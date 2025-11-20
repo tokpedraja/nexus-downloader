@@ -3,285 +3,372 @@ import yt_dlp
 import os
 import time
 import shutil
+import zipfile
 
-# --- PAGE CONFIGURATION (WAJIB PALING ATAS) ---
+# --- 1. PAGE CONFIGURATION ---
 st.set_page_config(
-    page_title="NEXUS BATCH DOWNLOADER",
+    page_title="NEXUS BATCH DOWNLOADER V4",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# --- ADVANCED CYBER-INDUSTRIAL CSS ---
-# CSS ini "memaksa" tampilan Streamlit menjadi kotak-kotak tegas (Brutalist Style)
+# --- 2. ADVANCED CYBER-INDUSTRIAL CSS ---
 st.markdown("""
     <style>
-    /* 1. GLOBAL FONT & COLOR */
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+    /* GLOBAL FONTS & COLORS */
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
     
-    html, body, [class*="css"] {
-        font-family: 'JetBrains Mono', monospace;
-        background-color: #050505;
-        color: #e0e0e0;
+    :root {
+        --neon-green: #ccff00;
+        --dark-bg: #050505;
+        --panel-bg: #0f0f0f;
+        --border-color: #333;
+        --text-main: #e0e0e0;
     }
 
-    /* 2. HILANGKAN GARIS MERAH/ORANGE BAWAAN STREAMLIT */
+    html, body, [class*="css"] {
+        font-family: 'JetBrains Mono', monospace;
+        background-color: var(--dark-bg);
+        color: var(--text-main);
+    }
+
+    /* HIDE STREAMLIT BLOAT */
     header {visibility: hidden;}
     .stDeployButton {display:none;}
     footer {visibility: hidden;}
 
-    /* 3. CUSTOM CONTAINERS (KOTAK PANEL) */
+    /* CUSTOM CONTAINERS */
     .cyber-card {
-        border: 1px solid #333;
-        background-color: #0f0f0f;
+        border: 1px solid var(--border-color);
+        background-color: var(--panel-bg);
         padding: 20px;
         margin-bottom: 20px;
-        box-shadow: 4px 4px 0px #1a1a1a;
+        box-shadow: 6px 6px 0px #1a1a1a;
+        position: relative;
+    }
+    .cyber-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 4px; height: 100%;
+        background: var(--neon-green);
     }
     
-    /* 4. CUSTOM TITLES */
+    /* HEADERS */
     .cyber-header {
-        color: #ccff00;
+        color: var(--neon-green);
         font-weight: 800;
-        border-bottom: 2px solid #333;
-        padding-bottom: 5px;
-        margin-bottom: 15px;
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 8px;
+        margin-bottom: 20px;
         text-transform: uppercase;
         letter-spacing: 2px;
-        font-size: 1.2rem;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
-    /* 5. INPUT FIELDS (TEXTAREA & INPUTS) */
-    .stTextArea textarea {
+    /* INPUT FIELDS */
+    .stTextArea textarea, .stSelectbox div[data-baseweb="select"], .stTextInput input {
         background-color: #000 !important;
         border: 1px solid #444 !important;
-        color: #00ff99 !important; /* Hijau Hacker */
-        border-radius: 0px;
+        color: #00ff99 !important;
+        border-radius: 0px !important;
     }
-    .stTextArea textarea:focus {
-        border-color: #ccff00 !important;
-        box-shadow: 0 0 10px rgba(204, 255, 0, 0.2);
+    .stTextArea textarea:focus, .stTextInput input:focus {
+        border-color: var(--neon-green) !important;
+        box-shadow: 0 0 15px rgba(204, 255, 0, 0.1);
     }
 
-    /* 6. BUTTONS (TOMBOL DOWNLOAD) */
+    /* BUTTONS */
     .stButton > button {
-        background-color: #ccff00 !important;
+        background-color: var(--neon-green) !important;
         color: #000 !important;
         border: none;
         border-radius: 0px;
         font-weight: 900;
         text-transform: uppercase;
         letter-spacing: 1px;
-        padding: 0.75rem 1rem;
+        padding: 1rem;
         transition: all 0.2s ease;
         width: 100%;
     }
     .stButton > button:hover {
         background-color: #fff !important;
-        box-shadow: 0 0 15px #ccff00;
         transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(204,255,0,0.4);
     }
 
-    /* 7. CHECKBOX & RADIO */
-    .stCheckbox label {
-        color: #bbb;
-    }
-
-    /* 8. PROGRESS BAR */
-    .stProgress > div > div > div > div {
-        background-color: #ccff00;
-    }
-    
-    /* 9. DOWNLOAD BUTTON (HASIL) */
+    /* DOWNLOAD BUTTONS */
     .stDownloadButton > button {
-        background-color: #1a1a1a !important;
-        color: #ccff00 !important;
-        border: 1px solid #ccff00 !important;
+        background-color: #111 !important;
+        color: var(--neon-green) !important;
+        border: 1px solid var(--neon-green) !important;
+        border-radius: 0px;
+        font-family: 'JetBrains Mono', monospace;
     }
     .stDownloadButton > button:hover {
-        background-color: #ccff00 !important;
+        background-color: var(--neon-green) !important;
         color: #000 !important;
+    }
+
+    /* PROGRESS & STATUS */
+    .stProgress > div > div > div > div { background-color: var(--neon-green); }
+    .stAlert { background-color: #111; border: 1px solid #333; color: #ccc; }
+    
+    /* TAB STYLING */
+    .stTabs [data-baseweb="tab-list"] { gap: 10px; }
+    .stTabs [data-baseweb="tab"] {
+        background-color: #111;
+        border: 1px solid #333;
+        border-radius: 0px;
+        color: #666;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: var(--neon-green) !important;
+        color: #000 !important;
+        border-color: var(--neon-green) !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# --- HEADER SECTION ---
+# --- 3. HEADER UI ---
 st.markdown("""
-    <div style="border-bottom: 2px solid #ccff00; padding-bottom: 10px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 20px;">
         <div>
-            <h1 style="margin:0; padding:0; color:white; font-size: 2rem; letter-spacing: -2px;">NEXUS<span style="color:#ccff00;">_BATCH</span></h1>
-            <p style="margin:0; font-size: 0.8rem; color: #666;">UNIVERSAL MEDIA DOWNLOADER // V.3.0-ULTR</p>
+            <h1 style="margin:0; font-size: 2.5rem; line-height: 1; color: white;">NEXUS<span style="color:#ccff00;">_ULTIMATE</span></h1>
+            <small style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">BATCH MEDIA PROCESSING UNIT V.4.0</small>
         </div>
-        <div style="background: #ccff00; color: black; padding: 5px 10px; font-weight: bold; font-size: 0.8rem;">SYSTEM_READY</div>
+        <div style="text-align: right;">
+            <span style="background:#ccff00; color:black; padding:2px 8px; font-weight:bold; font-size:0.7rem;">ONLINE</span>
+            <br><span style="color:#444; font-size: 0.7rem;">SECURE_CONNECTION</span>
+        </div>
     </div>
 """, unsafe_allow_html=True)
 
-# --- MAIN LAYOUT (2 KOLOM BESAR) ---
-col_left, col_right = st.columns([2, 1.2])
+# --- 4. SESSION STATE INIT ---
+if 'processing' not in st.session_state:
+    st.session_state.processing = False
+if 'download_complete' not in st.session_state:
+    st.session_state.download_complete = False
+
+# --- 5. MAIN LAYOUT ---
+col_left, col_right = st.columns([1.8, 1.2])
 
 with col_left:
-    # --- PANEL 1: INPUT ---
-    st.markdown('<div class="cyber-card"><div class="cyber-header">1. INPUT SOURCE LINKS</div>', unsafe_allow_html=True)
+    # PANEL INPUT
+    st.markdown('<div class="cyber-card"><div class="cyber-header"><span>📡</span> INPUT FEED</div>', unsafe_allow_html=True)
     input_links = st.text_area(
-        "LABEL_HIDDEN", 
-        height=250, 
-        placeholder="https://youtube.com/watch?v=...\nhttps://tiktok.com/@user/video/...\nhttps://instagram.com/p/...",
-        label_visibility="collapsed",
-        help="Masukkan satu link per baris"
-    )
-    st.markdown('</div>', unsafe_allow_html=True) # Close Card
-
-    # --- PANEL 3: LOGS & PREVIEW ---
-    st.markdown('<div class="cyber-card"><div class="cyber-header">3. LIVE TERMINAL</div>', unsafe_allow_html=True)
-    log_placeholder = st.empty()
-    log_placeholder.code("WAITING FOR COMMAND...", language="bash")
-    st.markdown('</div>', unsafe_allow_html=True) # Close Card
-
-with col_right:
-    # --- PANEL 2: CONFIGURATION ---
-    st.markdown('<div class="cyber-card"><div class="cyber-header">2. CONFIGURATION</div>', unsafe_allow_html=True)
-    
-    st.markdown("**MODE OPERASI**")
-    download_mode = st.radio(
-        "Pilih Mode:", 
-        ["Video + Audio (Best Quality)", "Audio Only (MP3)", "Thumbnail Only"],
+        "Paste Links", 
+        height=200, 
+        placeholder="https://youtube.com/watch?v=...\nhttps://tiktok.com/@user/video/...\nhttps://instagram.com/reel/...",
         label_visibility="collapsed"
     )
+    st.markdown("<small style='color:#444'>Support: YouTube, TikTok, IG, Twitter, FB, SoundCloud, dll.</small>", unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # PANEL TERMINAL
+    st.markdown('<div class="cyber-card"><div class="cyber-header"><span>📟</span> SYSTEM TERMINAL</div>', unsafe_allow_html=True)
+    terminal_container = st.empty()
+    terminal_container.code("SYSTEM_IDLE... WAITING FOR INPUT", language="bash")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with col_right:
+    # PANEL CONFIG
+    st.markdown('<div class="cyber-card"><div class="cyber-header"><span>⚙️</span> CONFIGURATION MATRIX</div>', unsafe_allow_html=True)
     
-    st.markdown("---")
-    st.markdown("**OPSI TAMBAHAN**")
+    # Tabs untuk Settings yang lebih rapi
+    tab1, tab2 = st.tabs(["BASIC", "ADVANCED"])
     
-    col_opt1, col_opt2 = st.columns(2)
-    with col_opt1:
-        opt_thumbnail = st.checkbox("Save Thumbnail", value=True, help="Download gambar cover video")
-        opt_metadata = st.checkbox("Save Metadata", value=False, help="Simpan info video (JSON)")
-    with col_opt2:
-        opt_subtitles = st.checkbox("Download Subs", value=False, help="Download subtitle jika tersedia")
-        opt_force_mp4 = st.checkbox("Force MP4", value=True, help="Paksa format video jadi MP4")
+    with tab1:
+        st.markdown("**FORMAT OUTPUT**")
+        format_mode = st.selectbox("Pilih Format", ["Video + Audio (MP4)", "Audio Only (MP3)", "Thumbnail Only"], label_visibility="collapsed")
+        
+        if "Video" in format_mode:
+            st.markdown("**KUALITAS VIDEO**")
+            resolution = st.select_slider(
+                "Target Resolusi",
+                options=["360p", "480p", "720p", "1080p", "2K/4K (Best)"],
+                value="1080p"
+            )
+        else:
+            resolution = "Best" # Dummy for audio
+            
+    with tab2:
+        st.markdown("**NAMING CONVENTION**")
+        filename_pattern = st.selectbox(
+            "Pola Nama File",
+            ["Judul Asli", "Channel - Judul", "Tanggal - Judul", "ID - Judul"],
+            index=0
+        )
+        
+        st.markdown("**PLAYLIST CONTROL**")
+        playlist_items = st.number_input("Max Video per Playlist (0 = Semua)", 0, 100, 0)
+        
+        st.markdown("**EXTRAS**")
+        c1, c2 = st.columns(2)
+        with c1:
+            opt_thumb = st.checkbox("Save Thumb", True)
+            opt_meta = st.checkbox("Save JSON", False)
+        with c2:
+            opt_sub = st.checkbox("Get Subs", False)
+            opt_browser = st.checkbox("Anti-Block", True, help="Simulasi Browser Chrome")
 
     st.markdown("---")
-    st.markdown("**FOLDER OUTPUT (Server)**")
-    st.code("/server/downloads/batch_01", language="bash")
-    
-    st.write("") # Spacer
-    start_btn = st.button("INITIATE DOWNLOAD SEQUENCE")
-    st.markdown('</div>', unsafe_allow_html=True) # Close Card
+    process_btn = st.button("⚡ INITIATE SEQUENCE", disabled=st.session_state.processing)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# --- LOGIC PEMROSESAN ---
-def get_ydl_opts(mode, save_thumb, save_subs, force_mp4):
-    # Dasar konfigurasi
-    opts = {
-        'outtmpl': 'downloads/%(title)s.%(ext)s',
-        'quiet': True,
-        'no_warnings': True,
-        'restrictfilenames': True,
+# --- 6. LOGIC FUNCTIONS ---
+
+def get_filename_template(choice):
+    templates = {
+        "Judul Asli": "%(title)s.%(ext)s",
+        "Channel - Judul": "%(uploader)s - %(title)s.%(ext)s",
+        "Tanggal - Judul": "%(upload_date)s - %(title)s.%(ext)s",
+        "ID - Judul": "%(id)s - %(title)s.%(ext)s"
     }
+    return f"downloads/{templates.get(choice, '%(title)s.%(ext)s')}"
+
+def get_resolution_string(res_choice):
+    # Mapping resolusi ke format yt-dlp
+    if "4K" in res_choice: return "bestvideo+bestaudio/best"
     
-    # 1. Konfigurasi Mode
-    if mode == "Audio Only (MP3)":
-        opts.update({
-            'format': 'bestaudio/best',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
-        })
-    elif mode == "Thumbnail Only":
-        opts.update({
-            'writethumbnail': True,
-            'skip_download': True, # Jangan download videonya
-        })
-    else: # Video + Audio
-        opts.update({
-            'format': 'bestvideo+bestaudio/best',
-        })
-        if force_mp4:
-            opts.update({'merge_output_format': 'mp4'})
+    height_map = {"1080p": 1080, "720p": 720, "480p": 480, "360p": 360}
+    h = height_map.get(res_choice, 1080)
+    return f"bestvideo[height<={h}]+bestaudio/best[height<={h}]"
 
-    # 2. Opsi Tambahan
-    if save_thumb and mode != "Thumbnail Only":
-        opts.update({'writethumbnail': True})
-    
-    if save_subs:
-        opts.update({
-            'writesubtitles': True,
-            'writeautomaticsub': False,
-            'subtitleslangs': ['en', 'id'], # Prioritas bahasa
-        })
+def create_zip_archive():
+    shutil.make_archive("batch_result", 'zip', "downloads")
+    return "batch_result.zip"
 
-    return opts
+# --- 7. EXECUTION CORE ---
 
-# --- EKSEKUSI ---
-if start_btn:
+if process_btn:
     if not input_links.strip():
-        st.error("❌ ERROR: INPUT LINK KOSONG!")
+        st.error("⚠️ ERROR: LINK INPUT IS EMPTY")
     else:
+        st.session_state.processing = True
         links = [l.strip() for l in input_links.split('\n') if l.strip()]
         
-        # Siapkan Folder
-        if os.path.exists('downloads'):
-            shutil.rmtree('downloads') # Bersihkan folder lama agar fresh
+        # Reset Workspace
+        if os.path.exists('downloads'): shutil.rmtree('downloads')
         os.makedirs('downloads')
         
-        # Progress Bar UI
-        progress_text = "INITIALIZING..."
-        my_bar = st.progress(0, text=progress_text)
         logs = []
-
-        # Loop Download
-        opts = get_ydl_opts(download_mode, opt_thumbnail, opt_subtitles, opt_force_mp4)
+        progress_bar = st.progress(0, text="INITIALIZING CORE...")
         
-        with yt_dlp.YoutubeDL(opts) as ydl:
+        # Setup Options
+        out_tmpl = get_filename_template(filename_pattern)
+        
+        ydl_opts = {
+            'outtmpl': out_tmpl,
+            'quiet': True,
+            'no_warnings': True,
+            'restrictfilenames': True,
+        }
+        
+        # Browser Masquerade (Anti-Block)
+        if opt_browser:
+            ydl_opts['user_agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+
+        # Playlist Limit
+        if playlist_items > 0:
+            ydl_opts['playlistend'] = playlist_items
+
+        # Format Logic
+        if "Audio" in format_mode:
+            ydl_opts.update({
+                'format': 'bestaudio/best',
+                'postprocessors': [{'key': 'FFmpegExtractAudio','preferredcodec': 'mp3','preferredquality': '192'}],
+            })
+        elif "Thumbnail" in format_mode:
+            ydl_opts.update({'writethumbnail': True, 'skip_download': True})
+        else:
+            ydl_opts.update({
+                'format': get_resolution_string(resolution),
+                'merge_output_format': 'mp4',
+            })
+
+        # Extras
+        if opt_thumb and "Thumbnail" not in format_mode: ydl_opts['writethumbnail'] = True
+        if opt_meta: ydl_opts['writeinfojson'] = True
+        if opt_sub: 
+            ydl_opts.update({'writesubtitles': True, 'subtitleslangs': ['en', 'id', 'all']})
+
+        # START LOOP
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             for i, link in enumerate(links):
                 try:
-                    # Update Log
-                    logs.append(f"[{time.strftime('%H:%M:%S')}] CONNECTING: {link[:30]}...")
-                    log_placeholder.code("\n".join(logs), language="bash")
+                    logs.append(f"[{time.strftime('%H:%M:%S')}] 🟡 CONNECTING: {link[:40]}...")
+                    terminal_container.code("\n".join(logs), language="bash")
                     
-                    # Proses Download
                     info = ydl.extract_info(link, download=True)
-                    title = info.get('title', 'Unknown File')
+                    title = info.get('title', 'Unknown')
                     
-                    logs.append(f"[{time.strftime('%H:%M:%S')}] SUCCESS: {title}")
-                    log_placeholder.code("\n".join(logs), language="bash")
+                    logs.append(f"[{time.strftime('%H:%M:%S')}] 🟢 SUCCESS: {title}")
+                    terminal_container.code("\n".join(logs), language="bash")
                     
                 except Exception as e:
-                    logs.append(f"[{time.strftime('%H:%M:%S')}] ERROR: {str(e)}")
-                    log_placeholder.code("\n".join(logs), language="bash")
+                    logs.append(f"[{time.strftime('%H:%M:%S')}] 🔴 ERROR: {str(e)[:50]}...")
+                    terminal_container.code("\n".join(logs), language="bash")
                 
-                # Update Bar
-                my_bar.progress((i + 1) / len(links), text=f"PROCESSING {i+1}/{len(links)}")
+                progress_bar.progress((i + 1) / len(links), text=f"PROCESSING {i+1}/{len(links)}")
 
-        my_bar.progress(1.0, text="BATCH COMPLETED")
-        st.success("✅ SEMUA PROSES SELESAI!")
+        st.session_state.processing = False
+        st.session_state.download_complete = True
+        progress_bar.progress(1.0, text="SEQUENCE COMPLETED")
 
-        # --- TAMPILKAN HASIL DOWNLOAD ---
-        st.markdown('<div class="cyber-card"><div class="cyber-header">4. OUTPUT FILES</div>', unsafe_allow_html=True)
+# --- 8. RESULT AREA (AUTO ZIP) ---
+if st.session_state.download_complete and os.path.exists('downloads'):
+    st.markdown('<div class="cyber-card"><div class="cyber-header"><span>💾</span> OUTPUT STORAGE</div>', unsafe_allow_html=True)
+    
+    files = os.listdir('downloads')
+    if not files:
+        st.warning("No files found.")
+    else:
+        col_res1, col_res2 = st.columns([3, 1])
         
-        files = os.listdir('downloads')
-        if not files:
-            st.warning("Tidak ada file yang berhasil diunduh.")
-        else:
-            # Kelompokkan file berdasarkan nama (Video+Thumbnail+Sub jadi satu grup)
-            st.write(f"Total Files: {len(files)}")
-            for f in files:
-                file_path = os.path.join('downloads', f)
-                
-                # Tentukan Icon berdasarkan ekstensi
-                icon = "📄"
-                if f.endswith(('.mp4', '.mkv', '.webm')): icon = "🎬 VIDEO"
-                elif f.endswith(('.mp3', '.wav', '.m4a')): icon = "🎵 AUDIO"
-                elif f.endswith(('.jpg', '.png', '.webp')): icon = "🖼️ IMAGE"
-                elif f.endswith(('.srt', '.vtt')): icon = "📝 SUB"
-
-                # Tombol Download Per File
-                with open(file_path, "rb") as file_data:
+        with col_res1:
+            st.write(f"**Total Files Retrieved:** {len(files)}")
+            # Expandable details
+            with st.expander("View File List"):
+                for f in files:
+                    st.code(f, language="text")
+        
+        with col_res2:
+            # ZIP ALL BUTTON
+            zip_path = create_zip_archive()
+            with open(zip_path, "rb") as fp:
+                st.download_button(
+                    label="📦 DOWNLOAD ZIP (ALL)",
+                    data=fp,
+                    file_name=f"NEXUS_BATCH_{int(time.time())}.zip",
+                    mime="application/zip",
+                    use_container_width=True
+                )
+        
+        st.markdown("---")
+        st.markdown("**INDIVIDUAL DOWNLOADS:**")
+        
+        # Grid Layout for individual files
+        cols = st.columns(3)
+        for idx, f in enumerate(files):
+            file_path = os.path.join('downloads', f)
+            # Determine icon
+            icon = "📄"
+            if f.endswith(('.mp4','.mkv')): icon = "🎬"
+            elif f.endswith(('.mp3','.m4a')): icon = "🎵"
+            elif f.endswith(('.jpg','.png','.webp')): icon = "🖼️"
+            
+            with cols[idx % 3]:
+                with open(file_path, "rb") as fp:
                     st.download_button(
-                        label=f"⬇ {icon}: {f}",
-                        data=file_data,
+                        label=f"{icon} {f[:15]}...",
+                        data=fp,
                         file_name=f,
-                        mime="application/octet-stream",
-                        key=f # Unique key
+                        key=f"btn_{idx}",
+                        help=f
                     )
-        st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
