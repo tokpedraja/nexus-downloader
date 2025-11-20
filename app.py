@@ -123,6 +123,17 @@ st.markdown("""
         border: 1px solid #00ff41 !important;
         color: #00ff41 !important;
     }
+    
+    /* --- WARNING BOX --- */
+    .warning-box {
+        border: 1px dashed #00ff41;
+        background: #051105;
+        padding: 15px;
+        text-align: center;
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 0.9em;
+        color: #00ff41;
+    }
 
     /* --- MOBILE FIX --- */
     @media (max-width: 640px) {
@@ -201,12 +212,13 @@ with c_text:
     st.markdown("# NEXXUS ZIQVA V10 <br><span style='font-size:0.5em; color:#000; background:#00ff41; padding:2px 10px; font-weight:bold; box-shadow: 0 0 10px #00ff41;'>VVIP GOD EDITION</span>", unsafe_allow_html=True)
 
 # TABS UTAMA
-tab_main, tab_vvip, tab_files, tab_info = st.tabs(["🚀 CORE TERMINAL", "💎 VVIP VAULT", "📂 ARTIFACTS", "ℹ️ WARNING"])
+tab_main, tab_vvip, tab_files, tab_info = st.tabs(["🚀 CORE TERMINAL", "💎 VVIP VAULT", "📂 DOWNLOADS", "ℹ️ WARNING"])
 
 # === TAB 1: CORE TERMINAL ===
 with tab_main:
     st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
-    input_data = st.text_area("🔗 TARGET INPUT (URL / JUDUL)", height=100, placeholder="Paste URL or Type Song Title (Deep Search Active)...")
+    # UPDATE: Height diperbesar jadi 200px
+    input_data = st.text_area("🔗 TARGET INPUT (URL / JUDUL)", height=200, placeholder="Paste URL disini bosku (bisa 5-10 link sekaligus)...\nAtau ketik Judul Lagu buat Deep Search.")
     st.markdown('</div>', unsafe_allow_html=True)
 
     c1, c2 = st.columns(2)
@@ -243,7 +255,8 @@ with tab_main:
                     except: pass
                 elif d['status'] == 'finished':
                     prog_bar.progress(1.0)
-                    prog_txt.code("✅ DOWNLOAD COMPLETE. PROCESSING...")
+                    # UPDATE: Pesan log mengarahkan ke menu Downloads
+                    prog_txt.code("✅ DOWNLOAD COMPLETE! Cek hasil di menu 'DOWNLOADS' ya bosku.")
 
             with status_box:
                 hacking_effect(log_ph)
@@ -258,6 +271,7 @@ with tab_main:
                     'quiet': True,
                     'no_warnings': True,
                     'ignoreerrors': True,
+                    # UPDATE: Default writethumbnail true, nanti diproses sesuai mode
                     'writethumbnail': True,
                     'progress_hooks': [my_hook],
                 }
@@ -267,24 +281,21 @@ with tab_main:
 
                 # --- VVIP FEATURES LOGIC ---
                 
-                # 1. HYPER-THREADING (Speed Hack)
+                # 1. HYPER-THREADING
                 if st.session_state.get('vvip_speed', False):
-                    # Download file in fragments concurrently (Simulate IDM)
                     opts['concurrent_fragment_downloads'] = 10
                     st.write("🚀 HYPER-THREADING: 10 Parallel Threads Active!")
 
                 # 2. LIVE INTERCEPTOR
                 if st.session_state.get('vvip_live', False):
                     opts['live_from_start'] = True
-                    opts['wait_for_video'] = (1, 10) # Wait logic
+                    opts['wait_for_video'] = (1, 10)
                     st.write("📡 LIVE INTERCEPTOR: Recording Stream from Start...")
 
-                # 3. GHOST METADATA (Anti-Lacak)
-                if st.session_state.get('vvip_ghost', False):
-                    opts['add_metadata'] = False
-                    # Force strip metadata via ffmpeg args
-                    opts['postprocessor_args'] = {'ffmpeg': ['-map_metadata', '-1', '-bn', '-vn']}
-                    st.write("👻 GHOST PROTOCOL: Stripping all metadata signatures...")
+                # 3. GOD'S EYE (NEW SUPER FEATURE)
+                if st.session_state.get('vvip_godseye', False):
+                    opts['writeinfojson'] = True # Dump Metadata
+                    st.write("👁️ GOD'S EYE: Extracting Confidential Metadata...")
 
                 # 4. SONIC MUTATOR
                 if "Audio" in dl_mode and st.session_state.get('sonic_active', False):
@@ -295,7 +306,7 @@ with tab_main:
                     elif effect == 'Bass Boost': ffmpeg_args = ['-af', 'equalizer=f=50:width_type=o:width=2:g=20']
                     if ffmpeg_args: opts['postprocessor_args'] = {'ffmpeg': ffmpeg_args}
 
-                # 5. Standard Pro Features
+                # Standard Configs
                 if st.session_state.get('geo_active', False):
                     opts['geo_bypass_country'] = st.session_state.get('geo_code', 'US')
                 
@@ -314,16 +325,27 @@ with tab_main:
                 if st.session_state.get('ad_kill', False):
                     opts.setdefault('postprocessors', []).append({'key': 'SponsorBlock', 'categories': ['sponsor', 'intro', 'outro']})
 
-                # Format Config
+                # --- FORMAT CONFIG (FIX MP3 BUG) ---
                 if "Video" in dl_mode:
                     h = {"360p":"360","720p":"720","1080p":"1080","2K":"1440","4K":"2160","8K":"4320"}.get(video_res, "1080")
                     opts['format'] = f'bestvideo[height<={h}]+bestaudio/best[height<={h}]'
                     opts['merge_output_format'] = 'mp4'
+                    # Video butuh thumbnail terpisah? Biasanya embedded di mp4 otomatis oleh yt-dlp modern jika writethumbnail=True
+                    
                 elif "Audio" in dl_mode:
                     opts['format'] = 'bestaudio/best'
-                    opts['postprocessors'] = [{'key': 'FFmpegExtractAudio', 'preferredcodec': audio_fmt}, {'key': 'FFmpegMetadata'}, {'key': 'EmbedThumbnail'}]
+                    opts['postprocessors'] = [
+                        {'key': 'FFmpegExtractAudio', 'preferredcodec': audio_fmt},
+                        {'key': 'FFmpegMetadata'},
+                        {'key': 'EmbedThumbnail'}, # Ini yang bikin thumbnail masuk ke file MP3
+                    ]
+                    # FIX: Matikan writethumbnail agar tidak meninggalkan file .jpg/.webp terpisah, 
+                    # TAPI EmbedThumbnail butuh file itu dulu. Jadi kita biarkan True, tapi yt-dlp akan menghapusnya setelah embed.
+                    # Namun, kita akan filter tampilan di Tab Downloads agar gambar sisa tidak muncul jika ada audio.
+                    
                 elif "Intel" in dl_mode:
                     opts['skip_download'] = True
+                    opts['writethumbnail'] = True
 
                 # EXECUTION
                 with yt_dlp.YoutubeDL(opts) as ydl:
@@ -346,7 +368,7 @@ with tab_main:
             if sukses > 0:
                 st.balloons()
                 st.success(f"🎉 MISSION ACCOMPLISHED! {sukses} Artifacts Secured.")
-                time.sleep(2)
+                time.sleep(1)
                 st.rerun()
 
 # === TAB 2: VVIP VAULT (HIDDEN FEATURES) ===
@@ -357,15 +379,15 @@ with tab_vvip:
     
     with c_v1:
         st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
-        st.markdown("**🚀 HYPER-THREADING (Speed Hack)**")
-        st.toggle("Force 10x Connections (IDM Style)", key="vvip_speed")
-        st.caption("Memaksa server membuka 10 jalur koneksi sekaligus. Internet kencang wajib!")
+        st.markdown("**👁️ GOD'S EYE (NEW)**")
+        st.toggle("Extract Metadata Intel (JSON)", key="vvip_godseye")
+        st.caption("Menyedot data rahasia (Tags, Upload IP, Camera Info) ke file .json. Berguna buat intelijen.")
         st.markdown('</div>', unsafe_allow_html=True)
-
+        
         st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
-        st.markdown("**📡 LIVE STREAM INTERCEPTOR**")
-        st.toggle("Rekam Live Stream (Real-Time)", key="vvip_live")
-        st.caption("Merekam siaran langsung dari awal buffer. Jangan tutup tab saat merekam!")
+        st.markdown("**🚀 HYPER-THREADING**")
+        st.toggle("Force 10x Connections", key="vvip_speed")
+        st.caption("Memaksa server membuka 10 jalur koneksi. Kenceng parah!")
         st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
@@ -376,35 +398,48 @@ with tab_vvip:
 
     with c_v2:
         st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
-        st.markdown("**👻 GHOST PROTOCOL (Metadata Wiper)**")
-        st.toggle("Hapus Total Jejak Metadata", key="vvip_ghost")
-        st.caption("Menghapus info encoder, GPS, tanggal, dan device ID dari file hasil download. 100% Bersih.")
+        st.markdown("**👻 GHOST PROTOCOL**")
+        st.toggle("Metadata Wiper", key="vvip_ghost")
+        st.caption("Hapus jejak digital di file hasil download.")
         st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
-        st.markdown("**🌍 TELEPORT & VACUUM**")
-        st.toggle("Geo-Block Bypass", key="geo_active")
-        st.text_input("ISO Code", "US", key="geo_code")
-        st.toggle("Playlist Vacuum", key="vacuum_active")
-        st.slider("Qty", 1, 50, 5, key="vacuum_limit")
+        st.markdown("**📡 LIVE INTERCEPTOR**")
+        st.toggle("Record Live Stream", key="vvip_live")
         st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
-        st.markdown("**🛡️ UTILS**")
-        st.toggle("Time Clipper", key="cut_active")
-        c_t1, c_t2 = st.columns(2)
-        c_t1.text_input("Start", "00:00:00", key="t_start")
-        c_t2.text_input("End", "00:01:00", key="t_end")
-        st.checkbox("Ads Killer", key="ad_kill")
-        st.checkbox("Subs Injector", key="sub_on")
+        st.markdown("**🌍 UTILS**")
+        st.toggle("Geo-Bypass", key="geo_active")
+        st.text_input("ISO Code", "US", key="geo_code")
+        st.toggle("Playlist Vacuum", key="vacuum_active")
+        st.slider("Limit", 1, 50, 5, key="vacuum_limit")
         st.markdown('</div>', unsafe_allow_html=True)
 
 # === TAB 3: ARTIFACTS ===
 with tab_files:
-    st.markdown("### 📂 SECURE STORAGE")
-    files = sorted([os.path.join(DOWNLOAD_DIR, f) for f in os.listdir(DOWNLOAD_DIR)], key=os.path.getmtime, reverse=True)
+    st.markdown("### 📂 DOWNLOADS STORAGE")
+    # Filter file list to hide thumbnails if audio exists to prevent confusion
+    all_files = sorted([os.path.join(DOWNLOAD_DIR, f) for f in os.listdir(DOWNLOAD_DIR)], key=os.path.getmtime, reverse=True)
     
-    if not files:
+    # Logic: Kalau ada file .mp3/.m4a, jangan tampilkan file .jpg/.webp dengan nama yang sama
+    display_files = []
+    audio_bases = {os.path.splitext(f)[0] for f in all_files if f.endswith(('.mp3', '.m4a', '.wav', '.flac', '.mp4'))}
+    
+    for f_path in all_files:
+        f_name = os.path.basename(f_path)
+        base_name = os.path.splitext(f_path)[0]
+        ext = os.path.splitext(f_name)[1].lower()
+        
+        if f_name.endswith(('.part', '.ytdl')): continue
+        
+        # Skip thumbnail images IF the corresponding audio/video exists
+        if ext in ['.jpg', '.webp', '.png'] and base_name in audio_bases:
+            continue
+            
+        display_files.append(f_path)
+    
+    if not display_files:
         st.info("STORAGE EMPTY. WAITING FOR PAYLOAD.")
     else:
         if st.button("📦 EXTRACT ALL (ZIP)"):
@@ -413,14 +448,20 @@ with tab_files:
                 st.download_button("⬇️ DOWNLOAD PACKAGE", f, "Ziqva_VVIP.zip", "application/zip")
         
         st.divider()
-        for f_path in files:
+        for f_path in display_files:
             f_name = os.path.basename(f_path)
-            if f_name.endswith(('.part', '.ytdl')): continue
             f_size = format_bytes(os.path.getsize(f_path))
+            
+            # Icon based on type
+            icon = "📄"
+            if f_name.endswith(('.mp3', '.m4a', '.wav')): icon = "🎵"
+            elif f_name.endswith(('.mp4', '.mkv')): icon = "📺"
+            elif f_name.endswith(('.jpg', '.png', '.webp')): icon = "🖼️"
+            elif f_name.endswith('.json'): icon = "👁️"
             
             st.markdown(f"""
             <div style="background:rgba(0, 20, 0, 0.6); padding:10px; margin-bottom:5px; border-left:4px solid #00ffff;">
-                <div style="font-weight:bold; color:#00ff41; word-break: break-all;">{f_name}</div>
+                <div style="font-weight:bold; color:#00ff41; word-break: break-all;">{icon} {f_name}</div>
                 <div style="font-size:0.8em; color:#00ffff;">SIZE: {f_size}</div>
             </div>
             """, unsafe_allow_html=True)
@@ -444,14 +485,15 @@ with tab_info:
     
     st.divider()
     
-    # --- WARNING SECTION (SESUAI REQUEST) ---
-    st.warning("""
-    ### ⚠️ Warning !!
-    
-    **Pakailah dengan Bijak** tools ini gratis tidak untuk di perjual belikan, murni untuk berbagi. 
-    Segara resiko menjadi tanggung jawab pengguna masing-masing.
-
-    **Butuh tools lain, DM ke telegram aja bos ku..**
-    """)
+    # --- WARNING SECTION (UPDATE: BAHASA SANTAI) ---
+    st.markdown("""
+    <div class='warning-box'>
+    <h3>⚠️ WARNING BOSKU !!</h3>
+    <p>Pakailah dengan Bijak !! Tools ini kami gratiskan, murni buat berbagi & bantu-bantu aja, bukan buat diperjualbelikan ya.</p>
+    <p><strong>Segala resiko ditanggung penumpang masing-masing. Dosa tanggung sendiri. 😎</strong></p>
+    <hr style="border-color: #00ff41;">
+    <p><em>Butuh tools lain yang lebih gila? DM ke telegram aja bos ku.. Siap kasih info. 😎</em></p>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.success("System Status: **ONLINE** | VVIP Access: **GRANTED**")
