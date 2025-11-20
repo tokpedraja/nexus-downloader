@@ -256,7 +256,7 @@ with tab_main:
                 elif d['status'] == 'finished':
                     prog_bar.progress(1.0)
                     # UPDATE: Pesan log mengarahkan ke menu Downloads
-                    prog_txt.code("✅ DOWNLOAD COMPLETE! Cek hasil di menu 'DOWNLOADS' ya bosku.")
+                    prog_txt.code("✅ JIKA DOWNLOAD COMPLETE! Cek hasil di menu 'DOWNLOADS' ya bosku..😎 ")
 
             with status_box:
                 hacking_effect(log_ph)
@@ -497,3 +497,4 @@ with tab_info:
     """, unsafe_allow_html=True)
     
     st.success("System Status: **ONLINE** | VVIP Access: **GRANTED**")
+
