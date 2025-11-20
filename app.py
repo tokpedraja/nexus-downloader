@@ -6,7 +6,7 @@ import time
 import random
 import re
 import glob
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 # --- 0. SYSTEM CONFIGURATION ---
 st.set_page_config(
@@ -172,9 +172,17 @@ def simulate_hacking(log_placeholder):
         "ACCESS GRANTED."
     ]
     log_text = ""
+    
+    # Set Timezone to WIB (UTC+7)
+    wib = timezone(timedelta(hours=7))
+    
     for line in lines:
-        time.sleep(random.uniform(0.1, 0.4))
-        timestamp = datetime.now().strftime("%H:%M:%S")
+        # Speed up animation slightly (0.05s - 0.2s) agar tidak terlalu lama menunggu
+        time.sleep(random.uniform(0.05, 0.2)) 
+        
+        # Get real-time WIB
+        timestamp = datetime.now(wib).strftime("%H:%M:%S")
+        
         log_text += f"[{timestamp}] > {line}\n"
         log_placeholder.code(log_text, language="bash")
 
