@@ -173,7 +173,7 @@ if not st.session_state['authenticated']:
         st.text_input("MASUKKAN KODE AKSES", type="password", key="access_code", on_change=check_access)
         st.button("UNLOCK SYSTEM 🔓", on_click=check_access, use_container_width=True)
         
-        st.markdown("<p style='text-align:center; color:#666; margin-top:20px; font-size:0.7em;'>Hint: ziqva.com</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align:center; color:#666; margin-top:20px; font-size:0.7em;'>Official Website: ziqva.com</p>", unsafe_allow_html=True)
     
     st.stop() # Stop app execution if not logged in
 
@@ -527,3 +527,4 @@ with tab_info:
     """, unsafe_allow_html=True)
     
     st.success("System Status: **ONLINE** | VVIP Access: **GRANTED**")
+
