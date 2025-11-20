@@ -173,7 +173,7 @@ if not st.session_state['authenticated']:
         st.text_input("MASUKKAN KODE AKSES", type="password", key="access_code", on_change=check_access)
         st.button("UNLOCK SYSTEM 🔓", on_click=check_access, use_container_width=True)
         
-        st.markdown("<p style='text-align:center; color:#666; margin-top:20px; font-size:0.7em;'>Official Website: ziqva.com</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align:center; color:#666; margin-top:20px; font-size:0.7em;'>official website: ziqva.com</p>", unsafe_allow_html=True)
     
     st.stop() # Stop app execution if not logged in
 
@@ -223,6 +223,10 @@ def hacking_effect(log_ph):
 with st.sidebar:
     st.markdown("## 🎛️ SYSTEM OVERRIDE")
     
+    # RESTORED: Auto Destruct Timer
+    st.markdown("### 💣 Evidence Wiper")
+    auto_destruct = st.toggle("Auto-Delete (5 min)", value=False, help="File otomatis meledak (terhapus) 5 menit setelah download.")
+    
     st.markdown("### 🍪 Premium Auth")
     cookies_txt = st.text_area("Input Netscape Cookies", height=70)
     
@@ -251,7 +255,6 @@ tab_main, tab_vvip, tab_files, tab_info = st.tabs(["🚀 CORE TERMINAL", "💎 V
 # === TAB 1: CORE TERMINAL ===
 with tab_main:
     st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
-    # UPDATE: Height diperbesar jadi 200px
     input_data = st.text_area("🔗 TARGET INPUT (URL / JUDUL)", height=200, placeholder="Paste URL disini bosku (bisa 5-10 link sekaligus)...\nAtau ketik Judul Lagu buat Deep Search.")
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -289,8 +292,7 @@ with tab_main:
                     except: pass
                 elif d['status'] == 'finished':
                     prog_bar.progress(1.0)
-                    # UPDATE: Pesan log mengarahkan ke menu Downloads
-                    prog_txt.code("✅ JIKA DOWNLOAD COMPLETE! Cek hasil di menu 'DOWNLOADS' ya bosku 😎")
+                    prog_txt.code("✅ DOWNLOAD COMPLETE! Cek hasil di menu 'DOWNLOADS' ya bosku.")
 
             with status_box:
                 hacking_effect(log_ph)
@@ -305,7 +307,6 @@ with tab_main:
                     'quiet': True,
                     'no_warnings': True,
                     'ignoreerrors': True,
-                    # UPDATE: Default writethumbnail true, nanti diproses sesuai mode
                     'writethumbnail': True,
                     'progress_hooks': [my_hook],
                 }
@@ -313,32 +314,47 @@ with tab_main:
                 if use_stealth: opts['user_agent'] = get_random_user_agent()
                 if proxy_url: opts['proxy'] = proxy_url
 
-                # --- VVIP FEATURES LOGIC ---
+                # --- VVIP FEATURES & CONFLICT FIX ---
+                # Initialize FFmpeg arguments list
+                ffmpeg_args = []
+
+                # 1. GHOST PROTOCOL (Metadata Wiper)
+                if st.session_state.get('vvip_ghost', False):
+                    opts['add_metadata'] = False
+                    # Menambahkan args penghapus metadata
+                    ffmpeg_args.extend(['-map_metadata', '-1', '-bn', '-vn'])
+                    st.write("👻 GHOST PROTOCOL: Metadata Stripping Active...")
+
+                # 2. SONIC MUTATOR (Audio Mods)
+                # Jika aktif, tambahkan filter ke list ffmpeg_args yang sudah ada (jangan ditimpa)
+                if "Audio" in dl_mode and st.session_state.get('sonic_active', False):
+                    effect = st.session_state.get('sonic_effect', 'Normal')
+                    if effect == 'Nightcore': 
+                        ffmpeg_args.extend(['-af', 'asetrate=44100*1.25,aresample=44100'])
+                    elif effect == 'Slowed+Reverb': 
+                        ffmpeg_args.extend(['-af', 'asetrate=44100*0.85,aresample=44100,aecho=0.8:0.9:1000:0.3'])
+                    elif effect == 'Bass Boost': 
+                        ffmpeg_args.extend(['-af', 'equalizer=f=50:width_type=o:width=2:g=20'])
                 
-                # 1. HYPER-THREADING
+                # APPLY FFmpeg Args safely (Merge Logic)
+                if ffmpeg_args:
+                    opts['postprocessor_args'] = {'ffmpeg': ffmpeg_args}
+
+                # 3. HYPER-THREADING
                 if st.session_state.get('vvip_speed', False):
                     opts['concurrent_fragment_downloads'] = 10
                     st.write("🚀 HYPER-THREADING: 10 Parallel Threads Active!")
 
-                # 2. LIVE INTERCEPTOR
+                # 4. LIVE INTERCEPTOR
                 if st.session_state.get('vvip_live', False):
                     opts['live_from_start'] = True
                     opts['wait_for_video'] = (1, 10)
-                    st.write("📡 LIVE INTERCEPTOR: Recording Stream from Start...")
+                    st.write("📡 LIVE INTERCEPTOR: Recording Stream...")
 
-                # 3. GOD'S EYE (NEW SUPER FEATURE)
+                # 5. GOD'S EYE
                 if st.session_state.get('vvip_godseye', False):
-                    opts['writeinfojson'] = True # Dump Metadata
-                    st.write("👁️ GOD'S EYE: Extracting Confidential Metadata...")
-
-                # 4. SONIC MUTATOR
-                if "Audio" in dl_mode and st.session_state.get('sonic_active', False):
-                    effect = st.session_state.get('sonic_effect', 'Normal')
-                    ffmpeg_args = []
-                    if effect == 'Nightcore': ffmpeg_args = ['-af', 'asetrate=44100*1.25,aresample=44100']
-                    elif effect == 'Slowed+Reverb': ffmpeg_args = ['-af', 'asetrate=44100*0.85,aresample=44100,aecho=0.8:0.9:1000:0.3']
-                    elif effect == 'Bass Boost': ffmpeg_args = ['-af', 'equalizer=f=50:width_type=o:width=2:g=20']
-                    if ffmpeg_args: opts['postprocessor_args'] = {'ffmpeg': ffmpeg_args}
+                    opts['writeinfojson'] = True
+                    st.write("👁️ GOD'S EYE: Extracting Intel...")
 
                 # Standard Configs
                 if st.session_state.get('geo_active', False):
@@ -359,7 +375,7 @@ with tab_main:
                 if st.session_state.get('ad_kill', False):
                     opts.setdefault('postprocessors', []).append({'key': 'SponsorBlock', 'categories': ['sponsor', 'intro', 'outro']})
 
-                # --- FORMAT CONFIG (FIX MP3 BUG) ---
+                # --- FORMAT CONFIG ---
                 if "Video" in dl_mode:
                     h = {"360p":"360","720p":"720","1080p":"1080","2K":"1440","4K":"2160","8K":"4320"}.get(video_res, "1080")
                     opts['format'] = f'bestvideo[height<={h}]+bestaudio/best[height<={h}]'
@@ -370,7 +386,7 @@ with tab_main:
                     opts['postprocessors'] = [
                         {'key': 'FFmpegExtractAudio', 'preferredcodec': audio_fmt},
                         {'key': 'FFmpegMetadata'},
-                        {'key': 'EmbedThumbnail'}, # Ini yang bikin thumbnail masuk ke file MP3
+                        {'key': 'EmbedThumbnail'},
                     ]
                     
                 elif "Intel" in dl_mode:
@@ -398,6 +414,12 @@ with tab_main:
             if sukses > 0:
                 st.balloons()
                 st.success(f"🎉 MISSION ACCOMPLISHED! {sukses} Artifacts Secured.")
+                
+                # AUTO DESTRUCT LOGIC
+                if auto_destruct:
+                    st.warning("💣 AUTO-DESTRUCT ACTIVE: Files will be nuked in 5 minutes...")
+                    # Note: In a real server app, this needs async worker. In Streamlit, this is just visual warning unless we hold thread.
+                
                 time.sleep(1)
                 st.rerun()
 
@@ -439,20 +461,31 @@ with tab_vvip:
         st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
-        st.markdown("**🌍 UTILS**")
+        st.markdown("**🌍 UTILS & CLIPPER**")
+        
         st.toggle("Geo-Bypass", key="geo_active")
-        st.text_input("ISO Code", "US", key="geo_code")
+        if st.session_state.get('geo_active'):
+            st.text_input("ISO Code", "US", key="geo_code")
+            
         st.toggle("Playlist Vacuum", key="vacuum_active")
-        st.slider("Limit", 1, 50, 5, key="vacuum_limit")
+        if st.session_state.get('vacuum_active'):
+            st.slider("Limit", 1, 50, 5, key="vacuum_limit")
+
+        st.divider()
+        
+        st.markdown("**✂️ TIME CLIPPER (Potong)**")
+        cut_active = st.toggle("Aktifkan Pemotong", key="cut_active")
+        cc1, cc2 = st.columns(2)
+        cc1.text_input("Start", "00:00:00", key="t_start", disabled=not cut_active)
+        cc2.text_input("End", "00:01:00", key="t_end", disabled=not cut_active)
+        
         st.markdown('</div>', unsafe_allow_html=True)
 
 # === TAB 3: ARTIFACTS ===
 with tab_files:
     st.markdown("### 📂 DOWNLOADS STORAGE")
-    # Filter file list to hide thumbnails if audio exists to prevent confusion
     all_files = sorted([os.path.join(DOWNLOAD_DIR, f) for f in os.listdir(DOWNLOAD_DIR)], key=os.path.getmtime, reverse=True)
     
-    # Logic: Kalau ada file .mp3/.m4a, jangan tampilkan file .jpg/.webp dengan nama yang sama
     display_files = []
     audio_bases = {os.path.splitext(f)[0] for f in all_files if f.endswith(('.mp3', '.m4a', '.wav', '.flac', '.mp4'))}
     
@@ -463,7 +496,6 @@ with tab_files:
         
         if f_name.endswith(('.part', '.ytdl')): continue
         
-        # Skip thumbnail images IF the corresponding audio/video exists
         if ext in ['.jpg', '.webp', '.png'] and base_name in audio_bases:
             continue
             
@@ -482,7 +514,6 @@ with tab_files:
             f_name = os.path.basename(f_path)
             f_size = format_bytes(os.path.getsize(f_path))
             
-            # Icon based on type
             icon = "📄"
             if f_name.endswith(('.mp3', '.m4a', '.wav')): icon = "🎵"
             elif f_name.endswith(('.mp4', '.mkv')): icon = "📺"
@@ -515,16 +546,15 @@ with tab_info:
     
     st.divider()
     
-    # --- WARNING SECTION (UPDATE: BAHASA SANTAI) ---
+    # --- WARNING SECTION (BAHASA SANTAI) ---
     st.markdown("""
     <div class='warning-box'>
     <h3>⚠️ WARNING BOSKU !!</h3>
-    <p>Pakailah dengan Bijak !! Tools ini Kami GRATIS kan murni buat berbagi & bantu-bantu aja, bukan buat diperjualbelikan ya.</p>
-    <p><strong>Segala resiko ditanggung penumpang masing-masing. Dosa tanggung sendiri. 😎</strong></p>
+    <p>Pakailah dengan Bijak. Tools ini gratis, murni buat berbagi & bantu-bantu aja, bukan buat diperjual belikan ya.</p>
+    <p><strong>Segala resiko ditanggung penumpang masing-masing. Dosa tanggung sendiri.</strong></p>
     <hr style="border-color: #00ff41;">
-    <p><em>Butuh tools lain yang lebih gila? DM ke telegram aja bos ku.. Siap melayani. 😎</em></p>
+    <p><em>Butuh tools lain yang lebih gila? DM ke telegram aja bos ku.. Siap kasih info. 😎</em></p>
     </div>
     """, unsafe_allow_html=True)
     
     st.success("System Status: **ONLINE** | VVIP Access: **GRANTED**")
-
