@@ -143,6 +143,40 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# --- SECURITY SYSTEM (LOGIN GATE) ---
+if 'authenticated' not in st.session_state:
+    st.session_state['authenticated'] = False
+
+def check_access():
+    # KODE AKSES DEFAULT: ziqva.com
+    if st.session_state['access_code'] == 'ziqva.com':
+        st.session_state['authenticated'] = True
+        st.toast("✅ AKSES DITERIMA! SELAMAT DATANG BOSKU.", icon="🔓")
+    else:
+        st.session_state['authenticated'] = False
+        st.toast("⛔ AKSES DITOLAK: Kode Salah Bos!", icon="☠️")
+
+if not st.session_state['authenticated']:
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    col_l1, col_l2, col_l3 = st.columns([1,2,1])
+    with col_l2:
+        st.markdown("""
+        <div style='text-align: center; border: 2px solid #00ff41; padding: 30px; background: rgba(0,20,0,0.85); box-shadow: 0 0 20px #00ff41;'>
+            <h1 style='color: #00ff41; margin-bottom: 0; text-shadow: 0 0 10px #00ff41;'>🔐 RESTRICTED AREA</h1>
+            <p style='color: #00ffff; letter-spacing: 3px; font-weight:bold;'>NEXXUS ZIQVA SECURITY PROTOCOL</p>
+            <hr style='border-color: #00ff41;'>
+            <p style='font-size: 0.8em; color: #ccc;'>SYSTEM LOCKED. AUTHORIZED PERSONNEL ONLY.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.text_input("MASUKKAN KODE AKSES", type="password", key="access_code", on_change=check_access)
+        st.button("UNLOCK SYSTEM 🔓", on_click=check_access, use_container_width=True)
+        
+        st.markdown("<p style='text-align:center; color:#666; margin-top:20px; font-size:0.7em;'>Hint: ziqva.com</p>", unsafe_allow_html=True)
+    
+    st.stop() # Stop app execution if not logged in
+
 # --- 2. FUNGSI BANTUAN ---
 def get_random_user_agent():
     agents = [
@@ -256,7 +290,7 @@ with tab_main:
                 elif d['status'] == 'finished':
                     prog_bar.progress(1.0)
                     # UPDATE: Pesan log mengarahkan ke menu Downloads
-                    prog_txt.code("✅ JIKA DOWNLOAD COMPLETE! Cek hasil di menu 'DOWNLOADS' ya bosku..😎 ")
+                    prog_txt.code("✅ JIKA DOWNLOAD COMPLETE! Cek hasil di menu 'DOWNLOADS' ya bosku 😎")
 
             with status_box:
                 hacking_effect(log_ph)
@@ -330,7 +364,6 @@ with tab_main:
                     h = {"360p":"360","720p":"720","1080p":"1080","2K":"1440","4K":"2160","8K":"4320"}.get(video_res, "1080")
                     opts['format'] = f'bestvideo[height<={h}]+bestaudio/best[height<={h}]'
                     opts['merge_output_format'] = 'mp4'
-                    # Video butuh thumbnail terpisah? Biasanya embedded di mp4 otomatis oleh yt-dlp modern jika writethumbnail=True
                     
                 elif "Audio" in dl_mode:
                     opts['format'] = 'bestaudio/best'
@@ -339,9 +372,6 @@ with tab_main:
                         {'key': 'FFmpegMetadata'},
                         {'key': 'EmbedThumbnail'}, # Ini yang bikin thumbnail masuk ke file MP3
                     ]
-                    # FIX: Matikan writethumbnail agar tidak meninggalkan file .jpg/.webp terpisah, 
-                    # TAPI EmbedThumbnail butuh file itu dulu. Jadi kita biarkan True, tapi yt-dlp akan menghapusnya setelah embed.
-                    # Namun, kita akan filter tampilan di Tab Downloads agar gambar sisa tidak muncul jika ada audio.
                     
                 elif "Intel" in dl_mode:
                     opts['skip_download'] = True
@@ -489,12 +519,11 @@ with tab_info:
     st.markdown("""
     <div class='warning-box'>
     <h3>⚠️ WARNING BOSKU !!</h3>
-    <p>Pakailah dengan Bijak !! Tools ini kami gratiskan, murni buat berbagi & bantu-bantu aja, bukan buat diperjualbelikan ya.</p>
+    <p>Pakailah dengan Bijak !! Tools ini Kami GRATIS kan murni buat berbagi & bantu-bantu aja, bukan buat diperjualbelikan ya.</p>
     <p><strong>Segala resiko ditanggung penumpang masing-masing. Dosa tanggung sendiri. 😎</strong></p>
     <hr style="border-color: #00ff41;">
-    <p><em>Butuh tools lain yang lebih gila? DM ke telegram aja bos ku.. Siap kasih info. 😎</em></p>
+    <p><em>Butuh tools lain yang lebih gila? DM ke telegram aja bos ku.. Siap melayani. 😎</em></p>
     </div>
     """, unsafe_allow_html=True)
     
     st.success("System Status: **ONLINE** | VVIP Access: **GRANTED**")
-
