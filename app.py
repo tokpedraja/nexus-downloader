@@ -7,97 +7,96 @@ import random
 import re
 from datetime import datetime, timedelta, timezone
 
-# --- 0. SYSTEM CONFIGURATION ---
+# --- 0. KONFIGURASI SISTEM ---
 st.set_page_config(
-    page_title="NEXUS TANK V9: ULTIMATE",
-    page_icon="☣️",
+    page_title="NEXXUS ZIQVA V9 - FREE",
+    page_icon="👽",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-DOWNLOAD_DIR = "Nexus_Downloads"
+DOWNLOAD_DIR = "Ziqva_Downloads"
 if not os.path.exists(DOWNLOAD_DIR):
     os.makedirs(DOWNLOAD_DIR)
 
-# --- 1. CYBERPUNK UI INJECTION (NEW BACKGROUND & ANIMATION) ---
+# --- 1. TAMPILAN ANTARMUKA (UI) ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap');
 
-    /* --- ANIMATED BACKGROUND (CYBER GRID) --- */
-    @keyframes gridMove {
-        0% { background-position: 0 0; }
-        100% { background-position: 50px 50px; }
+    /* --- BACKGROUND BARU: DIGITAL HORIZON --- */
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
 
     .stApp {
-        background-color: #050505;
-        background-image: 
-            linear-gradient(rgba(0, 255, 65, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 255, 65, 0.05) 1px, transparent 1px);
-        background-size: 40px 40px; /* Ukuran Grid */
-        animation: gridMove 4s linear infinite; /* Gerakan Grid */
-        color: #0f0;
-        font-family: 'Share Tech Mono', monospace;
+        background: linear-gradient(-45deg, #050505, #1a0b2e, #001f0f, #000000);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+        color: #00ffcc;
+        font-family: 'Rajdhani', sans-serif;
     }
 
-    /* --- TYPOGRAPHY & GLOW --- */
-    h1, h2, h3, h4 {
-        color: #00ff41 !important;
+    /* --- TYPOGRAPHY --- */
+    h1, h2, h3 {
+        font-family: 'Share Tech Mono', monospace;
+        color: #00ffcc !important;
         text-transform: uppercase;
-        text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
-        letter-spacing: 1px;
+        text-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
     }
     
-    /* --- INPUT FIELDS (Mobile Optimized) --- */
+    /* --- INPUT FIELDS YANG LEBIH SANTAI --- */
     .stTextArea textarea, .stTextInput input, .stSelectbox div[data-baseweb="select"] {
-        background-color: rgba(0, 0, 0, 0.8) !important;
-        color: #0f0 !important;
-        border: 1px solid #333 !important;
-        border-left: 3px solid #0f0 !important;
-        border-radius: 0px;
+        background-color: rgba(20, 20, 20, 0.7) !important;
+        color: #00ffcc !important;
+        border: 1px solid #00ffcc !important;
+        border-radius: 8px;
+        backdrop-filter: blur(5px);
     }
     
-    /* --- BUTTONS (Neon Style) --- */
+    /* --- TOMBOL --- */
     div.stButton > button {
-        background: #000 !important;
-        color: #0f0 !important;
-        border: 1px solid #0f0 !important;
-        box-shadow: 0 0 5px #0f0;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
+        background: transparent !important;
+        color: #00ffcc !important;
+        border: 2px solid #00ffcc !important;
+        border-radius: 12px;
         font-weight: bold;
+        font-size: 16px;
+        transition: all 0.3s ease;
         width: 100%;
     }
     div.stButton > button:hover {
-        background: #0f0 !important;
+        background: #00ffcc !important;
         color: #000 !important;
-        box-shadow: 0 0 20px #0f0, inset 0 0 10px #000;
+        box-shadow: 0 0 25px #00ffcc;
+        transform: scale(1.02);
     }
     
-    /* --- PROGRESS BAR COLOR --- */
-    .stProgress > div > div > div > div {
-        background-color: #0f0;
+    /* --- KARTU KONTEN --- */
+    .ziqva-card {
+        background: rgba(0, 0, 0, 0.6);
+        border-left: 4px solid #00ffcc;
+        padding: 20px;
+        border-radius: 0 10px 10px 0;
+        margin-bottom: 15px;
     }
 
-    /* --- MOBILE FIXES --- */
-    @media (max-width: 640px) {
-        .stApp { background-size: 20px 20px; } /* Grid lebih kecil di HP */
-        h1 { font-size: 1.5rem !important; }
+    /* --- PROGRESS BAR --- */
+    .stProgress > div > div > div > div {
+        background-color: #d600ff; /* Warna ungu neon */
+        background-image: linear-gradient(to right, #d600ff, #00ffcc);
     }
     
-    /* --- CARD STYLE --- */
-    .nexus-card {
-        background: rgba(10, 20, 10, 0.85);
-        border: 1px solid #1f1;
-        padding: 15px;
-        margin-bottom: 10px;
-        backdrop-filter: blur(2px);
+    /* --- MOBILE FIX --- */
+    @media (max-width: 640px) {
+        h1 { font-size: 1.8rem !important; }
     }
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. HELPER FUNCTIONS ---
+# --- 2. FUNGSI BANTUAN ---
 def get_random_user_agent():
     agents = [
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -123,254 +122,247 @@ def cleanup_vault():
     except:
         return False
 
-# --- 3. HACKER ANIMATION ---
-def simulate_hacking(log_placeholder):
-    lines = [
-        "INITIALIZING NEURAL LINK...",
-        "BYPASSING GEO-BLOCKING...",
-        "INJECTING PACKET STREAM...",
-        "OPTIMIZING BANDWIDTH...",
-        "ACCESS GRANTED."
+def hacking_effect(log_ph):
+    texts = [
+        "Menghubungkan ke satelit Ziqva...",
+        "Mencari celah keamanan...",
+        "Bypass firewall...",
+        "Menyedot kuota target...",
+        "Akses Diterima! Gasken..."
     ]
-    log_text = ""
+    log_str = ""
     wib = timezone(timedelta(hours=7))
-    
-    for line in lines:
-        time.sleep(random.uniform(0.1, 0.3)) 
-        timestamp = datetime.now(wib).strftime("%H:%M:%S")
-        log_text += f"[{timestamp}] > {line}\n"
-        log_placeholder.code(log_text, language="bash")
+    for txt in texts:
+        time.sleep(random.uniform(0.2, 0.4))
+        ts = datetime.now(wib).strftime("%H:%M:%S")
+        log_str += f"[{ts}] > {txt}\n"
+        log_ph.code(log_str, language="bash")
 
-# --- 4. SIDEBAR ---
+# --- 3. SIDEBAR ---
 with st.sidebar:
-    st.image("https://img.icons8.com/nolan/96/matrix-desktop.png", width=60)
-    st.markdown("## 🕹️ SYSTEM CONTROL")
+    st.markdown("## 🎛️ PUSAT KONTROL")
     
-    st.markdown("### 🔐 AUTH")
-    cookies_txt = st.text_area("Cookies (Netscape)", height=70, help="Wajib untuk video premium/login.")
+    st.markdown("### 🍪 Cookies (Opsional)")
+    cookies_txt = st.text_area("Paste disini kalo butuh login", height=70, help="Buat video yang butuh umur 18+ atau premium.")
     
-    st.markdown("### 🛡️ PROXY")
-    use_stealth = st.checkbox("Anti-Bot Rotation", value=True)
-    proxy_url = st.text_input("Custom Proxy IP")
+    st.markdown("### 👻 Mode Hantu")
+    use_stealth = st.checkbox("Anti-Deteksi", value=True)
+    proxy_url = st.text_input("Punya Proxy Sendiri?")
     
     st.divider()
-    if st.button("☢️ PURGE DATA"):
+    if st.button("🗑️ BERSIHKAN SAMPAH"):
         if cleanup_vault():
-            st.toast("MEMORY WIPED.", icon="💥")
+            st.toast("Bersih kinclong bosku!", icon="✨")
     
-    st.caption(f"Files: {len(os.listdir(DOWNLOAD_DIR))}")
+    st.caption(f"Total File: {len(os.listdir(DOWNLOAD_DIR))}")
 
-# --- 5. MAIN INTERFACE ---
-col_logo, col_title = st.columns([1, 6])
-with col_logo:
-    st.write("") 
-    st.markdown("<h1>☢️</h1>", unsafe_allow_html=True)
-with col_title:
-    st.markdown("# NEXUS TANK V9 <br><span style='font-size:0.4em; color:#888; letter-spacing:4px;'>ULTIMATE EDITION</span>", unsafe_allow_html=True)
+# --- 4. HEADER ---
+c_logo, c_text = st.columns([1, 6])
+with c_logo:
+    st.write("")
+    st.markdown("<h1>👽</h1>", unsafe_allow_html=True)
+with c_text:
+    st.markdown("# NEXXUS ZIQVA V9 <br><span style='font-size:0.5em; color:#d600ff; letter-spacing:3px;'>FREE EDITION</span>", unsafe_allow_html=True)
 
-# TABS
-tab_core, tab_sniper, tab_files, tab_logs = st.tabs(["⬇️ TERMINAL", "🎯 SNIPER MODE", "📦 STORAGE", "📟 LOGS"])
+# TABS UTAMA
+tab_main, tab_pro, tab_store, tab_info = st.tabs(["🚀 DOWNLOADER", "🛠️ FITUR PRO", "📂 FILE SAYA", "ℹ️ INFO PENTING"])
 
-# === TAB 1: CORE TERMINAL (DOWNLOADER) ===
-with tab_core:
-    st.markdown('<div class="nexus-card">', unsafe_allow_html=True)
-    target_urls = st.text_area("TARGET URLS (YouTube, TikTok, IG, FB, Twitter)", height=100, placeholder="Paste links here...")
+# === TAB 1: DOWNLOADER UTAMA ===
+with tab_main:
+    st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
+    target_urls = st.text_area("🔗 TEMPEL LINK DISINI (Bisa banyak baris)", height=100, placeholder="Contoh:\nhttps://youtube.com/watch?v=...\nhttps://tiktok.com/...")
     st.markdown('</div>', unsafe_allow_html=True)
 
     c1, c2 = st.columns(2)
     with c1:
-        dl_mode = st.selectbox("PROTOCOL", ["📺 VIDEO (Best)", "🎵 AUDIO (Convert)", "🖼️ THUMBNAIL"])
+        dl_mode = st.selectbox("MAU FORMAT APA?", ["📺 Video (Paling Jernih)", "🎵 Musik (MP3/M4A)", "🖼️ Cuma Thumbnail"])
     with c2:
-        if "VIDEO" in dl_mode:
-            video_res = st.select_slider("RESOLUTION LIMIT", options=["360p", "720p", "1080p", "4K"], value="1080p")
-        elif "AUDIO" in dl_mode:
-            audio_fmt = st.selectbox("FORMAT", ["mp3", "m4a", "flac"], index=0)
+        if "Video" in dl_mode:
+            video_res = st.select_slider("MENTOK RESOLUSI", options=["360p", "720p", "1080p", "4K"], value="1080p")
+        elif "Musik" in dl_mode:
+            audio_fmt = st.selectbox("JENIS AUDIO", ["mp3", "m4a", "flac"], index=0)
 
     st.write("")
-    if st.button("🚀 EXECUTE DOWNLOAD", type="primary", use_container_width=True):
+    if st.button("🔥 SIKAT BOSKU!", type="primary", use_container_width=True):
         if not target_urls.strip():
-            st.error("⚠️ NO TARGET DETECTED.")
+            st.warning("⚠️ Link-nya mana bos? Kosong nih.")
         else:
             urls = [u.strip() for u in target_urls.split('\n') if u.strip()]
             
-            # PROGRESS UI
-            status_cont = st.status("⚙️ INITIALIZING...", expanded=True)
+            # UI Progress
+            status_box = st.status("⚙️ Sedang memproses...", expanded=True)
             log_ph = st.empty()
-            
-            # --- PROGRESS HOOK (The Secret Sauce) ---
-            # Kita butuh placeholder di luar hook agar bisa diupdate
             prog_bar = st.progress(0)
-            prog_text = st.empty()
+            prog_txt = st.empty()
 
-            def progress_hook(d):
+            # Hook Progress
+            def my_hook(d):
                 if d['status'] == 'downloading':
                     try:
-                        # Parse percentage
                         p = d.get('_percent_str', '0%').replace('%','')
                         val = float(p) / 100
                         prog_bar.progress(min(val, 1.0))
-                        
-                        # Tampilkan Detail Statistik Real-time
-                        speed = d.get('_speed_str', 'N/A')
-                        eta = d.get('_eta_str', 'N/A')
-                        percent = d.get('_percent_str', '0%')
-                        prog_text.code(f"⚡ SPEED: {speed} | ⏳ ETA: {eta} | 🔋 DONE: {percent}")
-                    except:
-                        pass
+                        speed = d.get('_speed_str', '-')
+                        eta = d.get('_eta_str', '-')
+                        prog_txt.code(f"🚀 SPEED: {speed} | ⏳ SISA WAKTU: {eta}")
+                    except: pass
                 elif d['status'] == 'finished':
                     prog_bar.progress(1.0)
-                    prog_text.code("✅ DOWNLOAD FINISHED. CONVERTING...")
+                    prog_txt.code("✅ Download kelar, lagi convert...")
 
-            with status_cont:
-                st.write("Handshake protocol...")
-                simulate_hacking(log_ph)
+            with status_box:
+                hacking_effect(log_ph)
                 
-                # Cookie Setup
-                cookie_file = "nexus_cookies.txt"
+                # Setup
+                c_file = "ziqva_cookies.txt"
                 if cookies_txt:
-                    with open(cookie_file, "w") as f: f.write(cookies_txt)
+                    with open(c_file, "w") as f: f.write(cookies_txt)
                 
-                # YTDL CONFIG
-                ydl_opts = {
+                opts = {
                     'outtmpl': f'{DOWNLOAD_DIR}/%(title)s [%(id)s].%(ext)s',
                     'restrictfilenames': True,
                     'quiet': True,
                     'no_warnings': True,
                     'ignoreerrors': True,
                     'writethumbnail': True,
-                    'progress_hooks': [progress_hook], # Attach Hook
+                    'progress_hooks': [my_hook],
                 }
 
-                if use_stealth: ydl_opts['user_agent'] = get_random_user_agent()
-                if proxy_url: ydl_opts['proxy'] = proxy_url
+                if use_stealth: opts['user_agent'] = get_random_user_agent()
+                if proxy_url: opts['proxy'] = proxy_url
 
-                # SNIPER MODE CHECK (Time Range)
-                if st.session_state.get('sniper_active', False):
-                    start_t = st.session_state.get('sniper_start', '00:00:00')
-                    end_t = st.session_state.get('sniper_end', '00:01:00')
-                    # Gunakan command external downloader args untuk memotong
-                    ydl_opts['download_ranges'] = yt_dlp.utils.download_range_func(None, [(0, 0)]) # Dummy to trigger
-                    # NOTE: yt-dlp internal range agak tricky, kita pakai post-processor args via ffmpeg lebih stabil biasanya, 
-                    # tapi fitur 'download_ranges' callback lebih native jika didukung.
-                    # Cara paling ampuh di yt-dlp modern adalah:
-                    ydl_opts['external_downloader'] = 'ffmpeg'
-                    ydl_opts['external_downloader_args'] = {'ffmpeg_i': ['-ss', start_t, '-to', end_t]}
+                # Cek Fitur Pro
+                if st.session_state.get('cut_active', False):
+                    # Fitur potong video
+                    opts['external_downloader'] = 'ffmpeg'
+                    start = st.session_state.get('t_start', '00:00:00')
+                    end = st.session_state.get('t_end', '00:01:00')
+                    opts['external_downloader_args'] = {'ffmpeg_i': ['-ss', start, '-to', end]}
+                
+                if st.session_state.get('sub_on', False):
+                    opts['writesubtitles'] = True
+                    opts['subtitleslangs'] = ['all']
+                    opts['postprocessors'] = [{'key': 'FFmpegEmbedSubtitle'}]
 
-                # SUBTITLE CHECK
-                if st.session_state.get('sub_active', False):
-                    ydl_opts['writesubtitles'] = True
-                    ydl_opts['subtitleslangs'] = ['en', 'id', 'all']
-                    ydl_opts['postprocessors'] = [{'key': 'FFmpegEmbedSubtitle'}]
-
-                # MODE CONFIG
-                if "VIDEO" in dl_mode:
-                    res_map = {"360p": "360", "720p": "720", "1080p": "1080", "4K": "2160"}
-                    h = res_map.get(video_res, "1080")
-                    ydl_opts['format'] = f'bestvideo[height<={h}]+bestaudio/best[height<={h}]'
-                    ydl_opts['merge_output_format'] = 'mp4'
-                elif "AUDIO" in dl_mode:
-                    ydl_opts['format'] = 'bestaudio/best'
-                    ydl_opts['postprocessors'] = [
-                        {'key': 'FFmpegExtractAudio', 'preferredcodec': audio_fmt},
-                        {'key': 'FFmpegMetadata'},
-                        {'key': 'EmbedThumbnail'},
-                    ]
-                elif "THUMBNAIL" in dl_mode:
-                    ydl_opts['skip_download'] = True
-
-                # SPONSOR BLOCK
-                if st.session_state.get('sb_active', False):
-                    ydl_opts.setdefault('postprocessors', []).append({
+                if st.session_state.get('ad_kill', False):
+                    opts.setdefault('postprocessors', []).append({
                         'key': 'SponsorBlock',
                         'categories': ['sponsor', 'intro', 'outro'],
                     })
 
-                # EXECUTION
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    success = 0
-                    for i, url in enumerate(urls):
+                # Config Mode
+                if "Video" in dl_mode:
+                    h_map = {"360p": "360", "720p": "720", "1080p": "1080", "4K": "2160"}
+                    h = h_map.get(video_res, "1080")
+                    opts['format'] = f'bestvideo[height<={h}]+bestaudio/best[height<={h}]'
+                    opts['merge_output_format'] = 'mp4'
+                elif "Musik" in dl_mode:
+                    opts['format'] = 'bestaudio/best'
+                    opts['postprocessors'] = [
+                        {'key': 'FFmpegExtractAudio', 'preferredcodec': audio_fmt},
+                        {'key': 'FFmpegMetadata'},
+                        {'key': 'EmbedThumbnail'},
+                    ]
+                elif "Thumbnail" in dl_mode:
+                    opts['skip_download'] = True
+
+                # Eksekusi
+                with yt_dlp.YoutubeDL(opts) as ydl:
+                    sukses = 0
+                    for link in urls:
                         try:
-                            st.write(f"Targeting: {url}")
-                            ydl.extract_info(url, download=True)
-                            success += 1
+                            st.write(f"🎯 Target: {link}")
+                            ydl.extract_info(link, download=True)
+                            sukses += 1
                         except Exception as e:
-                            st.error(f"Error: {str(e)}")
+                            st.error(f"Gagal bos: {str(e)}")
                 
-                if os.path.exists(cookie_file): os.remove(cookie_file)
-                
-            if success > 0:
+                if os.path.exists(c_file): os.remove(c_file)
+            
+            if sukses > 0:
                 st.balloons()
-                st.success(f"✅ MISSION SUCCESS. {success} FILES SECURED.")
-                time.sleep(1.5)
+                st.success(f"🎉 MANTAP! {sukses} file berhasil diamankan.")
+                time.sleep(2)
                 st.rerun()
 
-# === TAB 2: SNIPER MODE (SECRET FEATURES) ===
-with tab_sniper:
-    st.markdown("### 🎯 SNIPER TOOLS")
-    st.caption("Fitur rahasia untuk manipulasi download tingkat lanjut.")
+# === TAB 2: FITUR PRO ===
+with tab_pro:
+    st.markdown("### 🛠️ OPREK LANJUTAN")
+    st.caption("Fitur tambahan buat yang ngerti-ngerti aja.")
 
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown('<div class="nexus-card">', unsafe_allow_html=True)
-        st.markdown("**⏱️ TIME CLIPPER**")
-        sniper_active = st.toggle("Enable Time Slice", key="sniper_active")
-        
-        sc1, sc2 = st.columns(2)
-        with sc1: 
-            st.text_input("Start (HH:MM:SS)", value="00:00:00", key="sniper_start", disabled=not sniper_active)
-        with sc2:
-            st.text_input("End (HH:MM:SS)", value="00:01:00", key="sniper_end", disabled=not sniper_active)
-        
-        st.caption("⚠️ Hanya download bagian durasi ini. Berguna untuk ambil klip/meme.")
+    col_a, col_b = st.columns(2)
+    with col_a:
+        st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
+        st.markdown("**✂️ POTONG DURASI**")
+        cut_active = st.toggle("Aktifkan Pemotong", key="cut_active")
+        c_t1, c_t2 = st.columns(2)
+        c_t1.text_input("Mulai", value="00:00:00", key="t_start", disabled=not cut_active)
+        c_t2.text_input("Selesai", value="00:01:00", key="t_end", disabled=not cut_active)
+        st.caption("Ambil bagian pentingnya aja biar hemat kuota.")
         st.markdown('</div>', unsafe_allow_html=True)
     
-    with c2:
-        st.markdown('<div class="nexus-card">', unsafe_allow_html=True)
-        st.markdown("**📝 SUBTITLE INJECTOR**")
-        sub_active = st.toggle("Auto-Burn Subtitles", key="sub_active")
-        st.caption("Otomatis download & embed subtitle (Indonesia/English) ke dalam video jika tersedia.")
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown('<div class="nexus-card">', unsafe_allow_html=True)
-        st.markdown("**🚫 AD-KILLER**")
-        sb_active = st.toggle("SponsorBlock AI", key="sb_active")
-        st.caption("Auto-skip segmen sponsor & intro youtuber.")
+    with col_b:
+        st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
+        st.markdown("**📺 SUBTITLE & IKLAN**")
+        st.toggle("Tanam Subtitle Otomatis", key="sub_on")
+        st.toggle("Hapus Iklan Sponsor (SponsorBlock)", key="ad_kill")
+        st.caption("Biar nonton makin nyaman tanpa gangguan.")
         st.markdown('</div>', unsafe_allow_html=True)
 
-# === TAB 3: STORAGE ===
-with tab_files:
-    st.markdown("### 📦 SECURE VAULT")
+# === TAB 3: FILE STORAGE ===
+with tab_store:
+    st.markdown("### 📂 HASIL DOWNLOAD")
     files = sorted([os.path.join(DOWNLOAD_DIR, f) for f in os.listdir(DOWNLOAD_DIR)], key=os.path.getmtime, reverse=True)
     
     if not files:
-        st.info("📁 VAULT IS EMPTY.")
+        st.info("Belum ada file nih bos. Download dulu gih!")
     else:
-        if st.button("📦 ZIP ALL FILES"):
-            shutil.make_archive("Nexus_Ultima", 'zip', DOWNLOAD_DIR)
-            with open("Nexus_Ultima.zip", "rb") as f:
-                st.download_button("⬇️ DOWNLOAD ZIP", f, f"Nexus_Ultima_{int(time.time())}.zip", "application/zip")
+        if st.button("📦 BUNGKUS SEMUA (ZIP)"):
+            shutil.make_archive("Paket_Ziqva", 'zip', DOWNLOAD_DIR)
+            with open("Paket_Ziqva.zip", "rb") as f:
+                st.download_button("⬇️ AMBIL ZIP", f, "Paket_Ziqva.zip", "application/zip")
         
         st.divider()
         for f_path in files:
             f_name = os.path.basename(f_path)
-            if f_name.endswith('.part') or f_name.endswith('.ytdl'): continue
+            if f_name.endswith(('.part', '.ytdl')): continue
+            
             f_size = format_bytes(os.path.getsize(f_path))
             
             st.markdown(f"""
-            <div style="background:rgba(0,20,0,0.6); border:1px dashed #0f0; padding:10px; margin-bottom:8px;">
-                <div style="color:#fff; font-weight:bold;">{f_name}</div>
-                <small style="color:#0f0;">SIZE: {f_size}</small>
+            <div style="background:rgba(255,255,255,0.1); padding:10px; border-radius:5px; margin-bottom:5px; border-left:3px solid #d600ff;">
+                <div style="font-weight:bold;">{f_name}</div>
+                <div style="font-size:0.8em; color:#aaa;">UKURAN: {f_size}</div>
             </div>
             """, unsafe_allow_html=True)
             
             with open(f_path, "rb") as fb:
-                st.download_button(f"⬇️ GET", fb, f_name, key=f_path, use_container_width=True)
+                st.download_button(f"⬇️ Ambil {f_name}", fb, f_name, key=f_path, use_container_width=True)
 
-# === TAB 4: LOGS ===
-with tab_logs:
-    st.subheader("📟 DEBUG CONSOLE")
-    c1, c2 = st.columns(2)
-    c1.metric("FFmpeg Status", "ONLINE" if shutil.which("ffmpeg") else "CRITICAL FAIL")
-    c2.metric("Storage Write", "OK" if os.access(DOWNLOAD_DIR, os.W_OK) else "LOCKED")
-    st.text_area("System Log", "Waiting for input signal...", height=150)
-    st.caption("Nexus Tank V9.0 Build 2025")
+# === TAB 4: ABOUT (REQUESTED) ===
+with tab_info:
+    st.markdown("### 👤 TENTANG DEVELOPER")
+    
+    col_info1, col_info2 = st.columns([1, 2])
+    with col_info1:
+        st.image("https://img.icons8.com/fluency/96/hacker.png", width=100)
+    with col_info2:
+        st.markdown("""
+        **Developer:** Telegram [@effands](https://t.me/effands)  
+        **Website:** [ziqva.com](https://ziqva.com)  
+        **Email:** cs@ziqva.com
+        """)
+    
+    st.divider()
+    
+    st.warning("""
+    ### ⚠️ PERINGATAN KERAS !!
+    **Pakailah dengan Bijak!** Tools ini gratis, tidak untuk diperjualbelikan. 
+    Murni niat saya untuk berbagi.
+    
+    **Segala resiko (dosa/tanggung jawab) ditanggung pengguna masing-masing ya bosku.**
+    """)
+    
+    st.success("""
+    **Butuh tools lain yang lebih gila?** Langsung DM ke telegram aja bos ku.. 😎
+    """)
