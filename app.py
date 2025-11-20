@@ -9,8 +9,8 @@ from datetime import datetime, timedelta, timezone
 
 # --- 0. KONFIGURASI SISTEM ---
 st.set_page_config(
-    page_title="NEXXUS ZIQVA V9.5 - GOD MODE",
-    page_icon="👽",
+    page_title="NEXXUS ZIQVA V10 - INSANITY",
+    page_icon="☣️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -22,100 +22,100 @@ if not os.path.exists(DOWNLOAD_DIR):
 # --- 1. TAMPILAN ANTARMUKA (UI) ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&display=swap');
 
-    /* --- BACKGROUND: CYBER GRID ANIMATION (KEMBALI) --- */
+    /* --- BACKGROUND: RED ALERT GRID --- */
     @keyframes gridMove {
         0% { background-position: 0 0; }
-        100% { background-position: 50px 50px; }
+        100% { background-position: 60px 60px; }
+    }
+    @keyframes pulseRed {
+        0% { box-shadow: 0 0 10px #ff004c; }
+        50% { box-shadow: 0 0 30px #ff004c; }
+        100% { box-shadow: 0 0 10px #ff004c; }
     }
 
     .stApp {
-        background-color: #020202;
+        background-color: #050000;
         background-image: 
-            linear-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 255, 204, 0.03) 1px, transparent 1px);
-        background-size: 40px 40px; /* Ukuran Grid */
-        animation: gridMove 3s linear infinite; /* Gerakan Grid */
-        color: #00ffcc;
-        font-family: 'Rajdhani', sans-serif;
+            linear-gradient(rgba(255, 0, 76, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 0, 76, 0.05) 1px, transparent 1px);
+        background-size: 50px 50px; 
+        animation: gridMove 4s linear infinite;
+        color: #ff004c;
+        font-family: 'Orbitron', sans-serif;
     }
 
     /* --- TYPOGRAPHY --- */
     h1, h2, h3 {
         font-family: 'Share Tech Mono', monospace;
-        color: #00ffcc !important;
+        color: #ff004c !important;
         text-transform: uppercase;
-        text-shadow: 0 0 15px rgba(0, 255, 204, 0.6);
+        text-shadow: 0 0 20px rgba(255, 0, 76, 0.8);
+        letter-spacing: 2px;
     }
     
     /* --- INPUT FIELDS --- */
     .stTextArea textarea, .stTextInput input, .stSelectbox div[data-baseweb="select"] {
-        background-color: rgba(10, 10, 10, 0.85) !important;
-        color: #00ffcc !important;
-        border: 1px solid #00ffcc !important;
-        border-radius: 4px; /* Lebih kotak biar techy */
+        background-color: rgba(20, 0, 5, 0.9) !important;
+        color: #ff004c !important;
+        border: 1px solid #ff004c !important;
+        border-radius: 2px;
         font-family: 'Share Tech Mono', monospace;
     }
     
-    /* --- TOMBOL --- */
+    /* --- TOMBOL INSANE --- */
     div.stButton > button {
         background: #000 !important;
-        color: #00ffcc !important;
-        border: 1px solid #00ffcc !important;
+        color: #ff004c !important;
+        border: 2px solid #ff004c !important;
         border-radius: 0px;
-        font-weight: bold;
-        font-size: 16px;
+        font-weight: 900;
+        font-size: 18px;
         text-transform: uppercase;
-        letter-spacing: 2px;
+        letter-spacing: 4px;
         transition: all 0.2s ease;
         width: 100%;
-        box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+        animation: pulseRed 3s infinite;
     }
     div.stButton > button:hover {
-        background: #00ffcc !important;
+        background: #ff004c !important;
         color: #000 !important;
-        box-shadow: 0 0 30px #00ffcc;
-        transform: translateY(-2px);
+        box-shadow: 0 0 50px #ff004c;
+        transform: scale(1.02);
     }
     
     /* --- KARTU KONTEN --- */
     .ziqva-card {
-        background: rgba(5, 20, 15, 0.8);
-        border: 1px dashed #00ffcc;
+        background: rgba(30, 0, 10, 0.8);
+        border: 1px solid #ff004c;
         padding: 20px;
         margin-bottom: 15px;
         position: relative;
     }
     .ziqva-card::before {
-        content: "SYSTEM_READY";
+        content: "CLASSIFIED";
         position: absolute;
-        top: -10px;
-        right: 10px;
+        top: -12px;
+        left: 10px;
         background: #000;
-        color: #00ffcc;
-        font-size: 10px;
-        padding: 0 5px;
-        border: 1px solid #00ffcc;
+        color: #ff004c;
+        font-size: 12px;
+        padding: 0 10px;
+        border: 1px solid #ff004c;
+        font-weight: bold;
     }
 
     /* --- PROGRESS BAR --- */
     .stProgress > div > div > div > div {
-        background-color: #00ffcc;
-        box-shadow: 0 0 10px #00ffcc;
+        background-color: #ff004c;
+        box-shadow: 0 0 15px #ff004c;
     }
     
-    /* --- TOAST --- */
-    .stToast {
-        background-color: #000 !important;
-        border: 1px solid #00ffcc !important;
-        color: #00ffcc !important;
-    }
-
     /* --- MOBILE FIX --- */
     @media (max-width: 640px) {
-        h1 { font-size: 1.8rem !important; }
-        .stApp { background-size: 20px 20px; }
+        h1 { font-size: 1.5rem !important; }
+        .stApp { background-size: 25px 25px; }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -148,11 +148,11 @@ def cleanup_vault():
 
 def hacking_effect(log_ph):
     texts = [
-        "Menghubungkan ke satelit Ziqva...",
-        "Mencari celah keamanan...",
-        "Bypass firewall geo-blocking...",
-        "Mengaktifkan protokol hantu...",
-        "Akses Diterima! Sikat bos..."
+        "Menginisiasi Protokol Insanity...",
+        "Mencari Database Terlarang...",
+        "Menembus Enkripsi Quantum...",
+        "Memanipulasi Gelombang Audio...",
+        "Akses Diberikan! Mode Gila Aktif..."
     ]
     log_str = ""
     wib = timezone(timedelta(hours=7))
@@ -164,57 +164,62 @@ def hacking_effect(log_ph):
 
 # --- 3. SIDEBAR ---
 with st.sidebar:
-    st.markdown("## 🎛️ PUSAT KONTROL")
+    st.markdown("## 🎛️ SYSTEM OVERRIDE")
     
-    st.markdown("### 🍪 Cookies (Opsional)")
-    cookies_txt = st.text_area("Paste Netscape Cookies", height=70, help="Wajib buat video premium/18+.")
+    st.markdown("### 💣 Evidence Wiper")
+    auto_destruct = st.toggle("Hancurkan File Otomatis", value=False, help="Hapus file otomatis setelah 5 menit biar aman.")
     
-    st.markdown("### 👻 Mode Hantu")
-    use_stealth = st.checkbox("Anti-Deteksi (User-Agent)", value=True)
-    proxy_url = st.text_input("Custom Proxy (http/socks)")
+    st.markdown("### 🍪 Auth Token")
+    cookies_txt = st.text_area("Input Netscape Cookies", height=70)
+    
+    st.markdown("### 👻 Stealth Ops")
+    use_stealth = st.checkbox("User-Agent Spoofing", value=True)
+    proxy_url = st.text_input("Elite Proxy Node")
     
     st.divider()
-    if st.button("🗑️ BERSIHKAN SAMPAH"):
+    if st.button("☢️ EMERGENCY NUKE"):
         if cleanup_vault():
-            st.toast("Bersih kinclong bosku!", icon="✨")
+            st.toast("SEMUA JEJAK DIHAPUS!", icon="💀")
     
-    st.caption(f"Total File: {len(os.listdir(DOWNLOAD_DIR))}")
+    st.caption(f"Artifacts: {len(os.listdir(DOWNLOAD_DIR))}")
 
 # --- 4. HEADER ---
 c_logo, c_text = st.columns([1, 6])
 with c_logo:
     st.write("")
-    st.markdown("<h1>👽</h1>", unsafe_allow_html=True)
+    st.markdown("<h1>☢️</h1>", unsafe_allow_html=True)
 with c_text:
-    st.markdown("# NEXXUS ZIQVA V9.5 <br><span style='font-size:0.5em; color:#00ffcc; letter-spacing:4px; background:#00332a; padding:2px 10px;'>GOD MODE EDITION</span>", unsafe_allow_html=True)
+    st.markdown("# NEXXUS ZIQVA V10 <br><span style='font-size:0.5em; color:#fff; background:#ff004c; padding:2px 10px; font-weight:bold;'>INSANITY EDITION</span>", unsafe_allow_html=True)
 
 # TABS UTAMA
-tab_main, tab_pro, tab_store, tab_info = st.tabs(["🚀 DOWNLOADER", "⚡ FITUR GOD", "📂 FILE SAYA", "ℹ️ INFO PENTING"])
+tab_main, tab_god, tab_files, tab_info = st.tabs(["🚀 CORE SYSTEM", "🧪 LAB GILA", "📂 ARTIFACTS", "ℹ️ INTEL"])
 
-# === TAB 1: DOWNLOADER UTAMA ===
+# === TAB 1: CORE SYSTEM (DOWNLOADER) ===
 with tab_main:
     st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
-    target_urls = st.text_area("🔗 TEMPEL LINK DISINI (Support Playlist/Channel)", height=100, placeholder="Contoh:\nhttps://youtube.com/watch?v=...\nhttps://tiktok.com/...")
+    # Input Logic: URL atau Keyword
+    input_data = st.text_area("🔗 MASUKKAN TARGET", height=100, placeholder="Tempel Link URL...\nATAU ketik Judul Lagu (Contoh: 'Niki Lowkey') - Deep Search Aktif!")
+    st.caption("💡 Tips: Males cari link? Ketik judulnya aja, kita carikan otomatis!")
     st.markdown('</div>', unsafe_allow_html=True)
 
     c1, c2 = st.columns(2)
     with c1:
-        dl_mode = st.selectbox("MAU FORMAT APA?", ["📺 Video (Paling Jernih)", "🎵 Musik (MP3/M4A)", "🖼️ Cuma Thumbnail"])
+        dl_mode = st.selectbox("PROTOKOL", ["📺 Video (Jernih)", "🎵 Musik (Audio Only)", "🖼️ Intel (Thumbnail)"])
     with c2:
         if "Video" in dl_mode:
-            video_res = st.select_slider("MENTOK RESOLUSI", options=["360p", "720p", "1080p", "2K", "4K"], value="1080p")
+            video_res = st.select_slider("KUALITAS VISUAL", options=["360p", "720p", "1080p", "2K", "4K"], value="1080p")
         elif "Musik" in dl_mode:
-            audio_fmt = st.selectbox("JENIS AUDIO", ["mp3", "m4a", "wav"], index=0)
+            audio_fmt = st.selectbox("FORMAT AUDIO", ["mp3", "wav", "flac"], index=0)
 
     st.write("")
-    if st.button("🔥 SIKAT BOSKU!", type="primary", use_container_width=True):
-        if not target_urls.strip():
-            st.warning("⚠️ Link-nya mana bos? Kosong nih.")
+    if st.button("🔥 EKSEKUSI TARGET", type="primary", use_container_width=True):
+        if not input_data.strip():
+            st.warning("⚠️ TARGET KOSONG! Masukkan Link atau Kata Kunci.")
         else:
-            urls = [u.strip() for u in target_urls.split('\n') if u.strip()]
+            raw_lines = [u.strip() for u in input_data.split('\n') if u.strip()]
             
             # UI Progress
-            status_box = st.status("⚙️ Sedang memproses...", expanded=True)
+            status_box = st.status("⚙️ INITIALIZING INSANITY...", expanded=True)
             log_ph = st.empty()
             prog_bar = st.progress(0)
             prog_txt = st.empty()
@@ -232,12 +237,12 @@ with tab_main:
                     except: pass
                 elif d['status'] == 'finished':
                     prog_bar.progress(1.0)
-                    prog_txt.code("✅ Download kelar, lagi convert...")
+                    prog_txt.code("✅ DOWNLOAD SELESAI. MEMPROSES DATA...")
 
             with status_box:
                 hacking_effect(log_ph)
                 
-                # Setup
+                # Setup Cookies
                 c_file = "ziqva_cookies.txt"
                 if cookies_txt:
                     with open(c_file, "w") as f: f.write(cookies_txt)
@@ -255,125 +260,139 @@ with tab_main:
                 if use_stealth: opts['user_agent'] = get_random_user_agent()
                 if proxy_url: opts['proxy'] = proxy_url
 
-                # --- LOGIKA FITUR GOD MODE ---
+                # --- FITUR GILA ---
                 
-                # 1. Geo-Bypass (Teleport)
+                # 1. SONIC MUTATOR (Audio Effects)
+                if "Musik" in dl_mode and st.session_state.get('sonic_active', False):
+                    effect = st.session_state.get('sonic_effect', 'Normal')
+                    ffmpeg_args = []
+                    
+                    if effect == 'Nightcore (Cepat+Tinggi)':
+                        # Speed 1.25x, Pitch naik
+                        ffmpeg_args = ['-af', 'asetrate=44100*1.25,aresample=44100']
+                        st.write("🔊 Mengaktifkan Efek: NIGHTCORE")
+                    elif effect == 'Slowed + Reverb (Galau)':
+                        # Speed 0.85x, Echo
+                        ffmpeg_args = ['-af', 'asetrate=44100*0.85,aresample=44100,aecho=0.8:0.9:1000:0.3']
+                        st.write("🔊 Mengaktifkan Efek: SLOWED + REVERB")
+                    elif effect == 'Bass Boost (Jebol)':
+                        # Equalizer frequency low
+                        ffmpeg_args = ['-af', 'equalizer=f=50:width_type=o:width=2:g=20']
+                        st.write("🔊 Mengaktifkan Efek: BASS BOOST")
+                    
+                    if ffmpeg_args:
+                        opts['postprocessor_args'] = {'ffmpeg': ffmpeg_args}
+
+                # 2. GOD MODE LOGIC
                 if st.session_state.get('geo_active', False):
-                    country_code = st.session_state.get('geo_code', 'US')
-                    opts['geo_bypass_country'] = country_code
-                    st.write(f"🌍 Teleportasi aktif ke: {country_code}")
-
-                # 2. Playlist Vacuum (Sedot)
+                    opts['geo_bypass_country'] = st.session_state.get('geo_code', 'US')
+                
                 if st.session_state.get('vacuum_active', False):
-                    limit = st.session_state.get('vacuum_limit', 5)
-                    opts['playlistend'] = limit
-                    st.write(f"🌪️ Mode Vakum Aktif: Ambil max {limit} video")
+                    opts['playlistend'] = st.session_state.get('vacuum_limit', 5)
                 else:
-                    opts['noplaylist'] = True # Default jangan ambil playlist
+                    opts['noplaylist'] = True
 
-                # 3. Fitur Potong (Time Clipper)
+                # 3. TIME CLIPPER
                 if st.session_state.get('cut_active', False):
                     opts['external_downloader'] = 'ffmpeg'
                     start = st.session_state.get('t_start', '00:00:00')
                     end = st.session_state.get('t_end', '00:01:00')
                     opts['external_downloader_args'] = {'ffmpeg_i': ['-ss', start, '-to', end]}
                 
-                # 4. Subtitle & Ads
+                # 4. EXTRAS
                 if st.session_state.get('sub_on', False):
-                    opts['writesubtitles'] = True
-                    opts['subtitleslangs'] = ['all']
-                    opts['postprocessors'] = [{'key': 'FFmpegEmbedSubtitle'}]
-
+                    opts['writesubtitles'] = True; opts['subtitleslangs'] = ['all']; opts['postprocessors'] = [{'key': 'FFmpegEmbedSubtitle'}]
                 if st.session_state.get('ad_kill', False):
-                    opts.setdefault('postprocessors', []).append({
-                        'key': 'SponsorBlock',
-                        'categories': ['sponsor', 'intro', 'outro'],
-                    })
+                    opts.setdefault('postprocessors', []).append({'key': 'SponsorBlock', 'categories': ['sponsor', 'intro', 'outro']})
 
-                # Config Mode Output
+                # CONFIG FORMAT
                 if "Video" in dl_mode:
-                    h_map = {"360p": "360", "720p": "720", "1080p": "1080", "2K": "1440", "4K": "2160"}
-                    h = h_map.get(video_res, "1080")
+                    h = {"360p":"360","720p":"720","1080p":"1080","2K":"1440","4K":"2160"}.get(video_res, "1080")
                     opts['format'] = f'bestvideo[height<={h}]+bestaudio/best[height<={h}]'
                     opts['merge_output_format'] = 'mp4'
                 elif "Musik" in dl_mode:
                     opts['format'] = 'bestaudio/best'
-                    opts['postprocessors'] = [
-                        {'key': 'FFmpegExtractAudio', 'preferredcodec': audio_fmt},
-                        {'key': 'FFmpegMetadata'},
-                        {'key': 'EmbedThumbnail'},
-                    ]
+                    opts['postprocessors'] = [{'key': 'FFmpegExtractAudio', 'preferredcodec': audio_fmt}, {'key': 'FFmpegMetadata'}, {'key': 'EmbedThumbnail'}]
                 elif "Thumbnail" in dl_mode:
                     opts['skip_download'] = True
 
-                # Eksekusi
+                # EKSEKUSI LOOP
                 with yt_dlp.YoutubeDL(opts) as ydl:
                     sukses = 0
-                    for link in urls:
+                    for line in raw_lines:
+                        # DEEP SEARCH LOGIC
+                        target = line
+                        if not line.startswith(('http', 'www')):
+                            st.write(f"🕵️ Deep Search: Mencari '{line}' di database...")
+                            target = f"ytsearch1:{line}"
+                        
                         try:
-                            st.write(f"🎯 Target: {link}")
-                            ydl.extract_info(link, download=True)
+                            st.write(f"🎯 Mengunci Target: {line}")
+                            ydl.extract_info(target, download=True)
                             sukses += 1
                         except Exception as e:
-                            st.error(f"Gagal bos: {str(e)}")
+                            st.error(f"Misi Gagal: {str(e)}")
                 
                 if os.path.exists(c_file): os.remove(c_file)
             
             if sukses > 0:
                 st.balloons()
-                st.success(f"🎉 MANTAP! {sukses} misi berhasil.")
+                st.success(f"🎉 MISI SELESAI! {sukses} Artifact diamankan.")
+                if auto_destruct:
+                    st.warning("💣 SELF-DESTRUCT: File akan dihapus dalam 5 menit...")
                 time.sleep(2)
                 st.rerun()
 
-# === TAB 2: FITUR GOD (SEBELUMNYA PRO) ===
-with tab_pro:
-    st.markdown("### ⚡ SENJATA RAHASIA")
-    st.caption("Aktifkan hanya jika dibutuhkan. Resiko kuota jebol ditanggung penumpang.")
-
-    col_god1, col_god2 = st.columns(2)
+# === TAB 2: LAB GILA (NEW FEATURES) ===
+with tab_god:
+    st.markdown("### 🧪 EXPERIMENTAL LAB")
     
-    with col_god1:
+    col_insane1, col_insane2 = st.columns(2)
+    
+    with col_insane1:
         st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
-        st.markdown("**🌍 JURUS TELEPORTASI (GEO-BYPASS)**")
-        geo_active = st.toggle("Tembus Blokir Negara", key="geo_active")
-        st.text_input("Kode Negara (ISO)", value="US", key="geo_code", disabled=not geo_active, help="Contoh: US (Amerika), JP (Jepang), SG (Singapura)")
-        st.caption("Nonton video yang diblokir di Indo. Masukkan kode negaranya.")
+        st.markdown("**🔊 SONIC MUTATOR (Audio Hack)**")
+        sonic_active = st.toggle("Aktifkan Modifikasi Audio", key="sonic_active")
+        st.selectbox("Pilih Efek", ["Nightcore (Cepat+Tinggi)", "Slowed + Reverb (Galau)", "Bass Boost (Jebol)"], key="sonic_effect", disabled=not sonic_active)
+        st.caption("⚠️ Hanya bekerja di Mode Musik. Mengubah suara asli video.")
         st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
-        st.markdown("**🌪️ MODE VAKUM (PLAYLIST)**")
-        vacuum_active = st.toggle("Sedot Satu Playlist/Channel", key="vacuum_active")
-        st.slider("Mau ambil berapa video awal?", 1, 10, 5, key="vacuum_limit", disabled=not vacuum_active)
-        st.caption("Otomatis download banyak video sekaligus dari link playlist.")
+        st.markdown("**🌍 JURUS TELEPORTASI**")
+        st.toggle("Bypass Negara (Geo-Block)", key="geo_active")
+        st.text_input("Kode ISO Negara", value="US", key="geo_code", placeholder="US, JP, SG...")
         st.markdown('</div>', unsafe_allow_html=True)
 
-    with col_god2:
+    with col_insane2:
         st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
-        st.markdown("**✂️ POTONG DURASI**")
-        cut_active = st.toggle("Aktifkan Pemotong", key="cut_active")
+        st.markdown("**🌪️ VACUUM CLEANER (Playlist)**")
+        st.toggle("Sedot Playlist/Channel", key="vacuum_active")
+        st.slider("Jumlah Video", 1, 20, 5, key="vacuum_limit")
+        st.caption("Otomatis download banyak video sekaligus.")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
+        st.markdown("**🛡️ DEFENSE SYSTEMS**")
+        st.toggle("Potong Durasi (Time Clipper)", key="cut_active")
         c_t1, c_t2 = st.columns(2)
-        c_t1.text_input("Mulai", value="00:00:00", key="t_start", disabled=not cut_active)
-        c_t2.text_input("Selesai", value="00:01:00", key="t_end", disabled=not cut_active)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
-        st.markdown("**🛡️ PROTEKSI & EKSTRA**")
-        st.toggle("Tanam Subtitle", key="sub_on")
-        st.toggle("Hapus Iklan (SponsorBlock)", key="ad_kill")
+        c_t1.text_input("Start", "00:00:00", key="t_start")
+        c_t2.text_input("End", "00:01:00", key="t_end")
+        st.checkbox("Auto Subtitle", key="sub_on")
+        st.checkbox("SponsorBlock AI", key="ad_kill")
         st.markdown('</div>', unsafe_allow_html=True)
 
-# === TAB 3: FILE STORAGE ===
-with tab_store:
-    st.markdown("### 📂 GUDANG PENYIMPANAN")
+# === TAB 3: ARTIFACTS ===
+with tab_files:
+    st.markdown("### 📂 GUDANG ARTIFACTS")
     files = sorted([os.path.join(DOWNLOAD_DIR, f) for f in os.listdir(DOWNLOAD_DIR)], key=os.path.getmtime, reverse=True)
     
     if not files:
-        st.info("Gudang kosong melompong. Maling dulu sana!")
+        st.info("ZONE CLEAR. Belum ada target yang dieksekusi.")
     else:
-        if st.button("📦 PAKETKAN SEMUA (ZIP)"):
-            shutil.make_archive("Paket_Ziqva_God", 'zip', DOWNLOAD_DIR)
-            with open("Paket_Ziqva_God.zip", "rb") as f:
-                st.download_button("⬇️ AMBIL PAKET", f, "Paket_Ziqva_God.zip", "application/zip")
+        if st.button("📦 BUNGKUS SEMUA (ZIP)"):
+            shutil.make_archive("Ziqva_Insanity", 'zip', DOWNLOAD_DIR)
+            with open("Ziqva_Insanity.zip", "rb") as f:
+                st.download_button("⬇️ DOWNLOAD PAKET", f, "Ziqva_Insanity.zip", "application/zip")
         
         st.divider()
         for f_path in files:
@@ -383,39 +402,34 @@ with tab_store:
             f_size = format_bytes(os.path.getsize(f_path))
             
             st.markdown(f"""
-            <div style="background:rgba(0, 20, 10, 0.5); padding:10px; margin-bottom:5px; border-left:3px solid #00ffcc;">
+            <div style="background:rgba(50, 0, 10, 0.5); padding:10px; margin-bottom:5px; border-left:4px solid #ff004c;">
                 <div style="font-weight:bold; word-break: break-all;">{f_name}</div>
-                <div style="font-size:0.8em; color:#aaa;">📦 {f_size}</div>
+                <div style="font-size:0.8em; color:#ff88a0;">UKURAN: {f_size}</div>
             </div>
             """, unsafe_allow_html=True)
             
             with open(f_path, "rb") as fb:
-                st.download_button(f"⬇️ {f_name}", fb, f_name, key=f_path, use_container_width=True)
+                st.download_button(f"⬇️ AMBIL {f_name}", fb, f_name, key=f_path, use_container_width=True)
 
-# === TAB 4: ABOUT ===
+# === TAB 4: INTEL ===
 with tab_info:
-    st.markdown("### 👤 TENTANG DEVELOPER")
+    st.markdown("### 👤 OPERATOR PROFILE")
     
-    col_info1, col_info2 = st.columns([1, 2])
-    with col_info1:
-        st.image("https://img.icons8.com/fluency/96/hacker.png", width=100)
-    with col_info2:
+    c_i1, c_i2 = st.columns([1, 3])
+    with c_i1:
+        st.image("https://img.icons8.com/fluency/96/hacker.png")
+    with c_i2:
         st.markdown("""
-        **Developer:** Telegram [@effands](https://t.me/effands)  
-        **Website:** [ziqva.com](https://ziqva.com)  
-        **Email:** cs@ziqva.com
+        **Codename:** Effands  
+        **Frequency:** [@effands](https://t.me/effands)  
+        **Base:** [ziqva.com](https://ziqva.com)  
         """)
     
-    st.divider()
+    st.error("""
+    ### ⚠️ PERINGATAN TINGKAT TINGGI
+    **TOOLS INI SANGAT POWERFUL.**
+    Gunakan Deep Search dan Sonic Mutator dengan bijak.
+    Jangan gunakan untuk membajak konten berhak cipta secara ilegal untuk tujuan komersil.
     
-    st.warning("""
-    ### ⚠️ PERINGATAN KERAS !!
-    **Pakailah dengan Bijak!** Tools ini gratis, tidak untuk diperjualbelikan. 
-    Murni niat saya untuk berbagi.
-    
-    **Segala resiko (dosa/tanggung jawab) ditanggung pengguna masing-masing ya bosku.**
-    """)
-    
-    st.success("""
-    **Butuh tools lain yang lebih gila?** Langsung DM ke telegram aja bos ku.. 😎
+    **Keep it underground. Stay safe.**
     """)
