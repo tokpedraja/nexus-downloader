@@ -21,7 +21,6 @@ if 'user_session_id' not in st.session_state:
 
 # Folder Download Unik per User (Absolute Path biar aman)
 BASE_DIR = "Ziqva_Temp_Storage"
-# Gunakan path absolut untuk menghindari kebingungan direktori kerja
 DOWNLOAD_DIR = os.path.abspath(os.path.join(BASE_DIR, st.session_state['user_session_id']))
 
 if not os.path.exists(DOWNLOAD_DIR):
@@ -30,12 +29,18 @@ if not os.path.exists(DOWNLOAD_DIR):
 # --- CLASS LOGGER KHUSUS UNTUK MENANGKAP ERROR ---
 class MyLogger:
     def debug(self, msg):
-        # Untuk debug message biasa, kita abaikan biar UI bersih
         pass
     def warning(self, msg):
-        st.warning(f"⚠️ Warning: {msg}")
+        # Filter warning umum agar user tidak panik
+        if "JavaScript" not in msg and "deprecated" not in msg:
+            st.warning(f"⚠️ Warning: {msg}")
     def error(self, msg):
-        st.error(f"❌ Error System: {msg}")
+        # Deteksi spesifik error Bot/Sign In
+        if "Sign in" in msg or "bot" in msg:
+            st.error("⛔ YOUTUBE BLOCK: Google mendeteksi server ini sebagai Bot.")
+            st.info("💡 SOLUSI: Wajib masukkan 'Netscape Cookies' di Sidebar agar dianggap user asli.")
+        else:
+            st.error(f"❌ Error System: {msg}")
 
 # --- 1. TAMPILAN ANTARMUKA (UI - MATRIX THEME) ---
 st.markdown("""
@@ -176,10 +181,11 @@ if not st.session_state['authenticated']:
 
 # --- 2. FUNGSI BANTUAN ---
 def get_random_user_agent():
+    # Update UA ke versi mobile/tablet untuk menghindari deteksi PC Bot
     agents = [
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15',
-        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+        'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
     ]
     return random.choice(agents)
 
@@ -223,6 +229,8 @@ with st.sidebar:
     st.markdown("### 💣 Evidence Wiper")
     auto_destruct = st.toggle("Auto-Delete (5 min)", value=False, help="File otomatis meledak (terhapus) 5 menit setelah download.")
     st.markdown("### 🍪 Premium Auth")
+    # Tambah pesan penting
+    st.info("💡 WAJIB ISI COOKIES JIKA ERROR 'SIGN IN' MUNCUL!")
     cookies_txt = st.text_area("Input Netscape Cookies", height=70)
     st.markdown("### 👻 Stealth Matrix")
     use_stealth = st.checkbox("User-Agent Spoofing", value=True)
@@ -245,7 +253,6 @@ with c_text:
 # TABS UTAMA
 tab_main, tab_vvip, tab_files, tab_info = st.tabs(["🚀 CORE TERMINAL", "💎 VVIP VAULT", "📂 DOWNLOADS", "ℹ️ WARNING & LOGS"])
 
-# Variabel global
 log_placeholder = None
 
 # === ISI TAB INFO & LOGS ===
@@ -340,7 +347,6 @@ with tab_main:
                 elif d['status'] == 'finished':
                     prog_bar.progress(1.0)
                     prog_txt.code("✅ PROCESSING ARTIFACT...")
-                    # Set absolute path to verify file existence
                     st.session_state['latest_file'] = d['filename']
 
             with status_box:
@@ -349,16 +355,23 @@ with tab_main:
                 if cookies_txt:
                     with open(c_file, "w") as f: f.write(cookies_txt)
                 
-                # --- KONFIGURASI YOUTUBE-DL (DIPERBAIKI) ---
+                # --- KONFIGURASI YOUTUBE-DL (FIXED LOGIC) ---
                 opts = {
                     'outtmpl': f'{DOWNLOAD_DIR}/%(title)s [%(id)s].%(ext)s',
                     'restrictfilenames': True,
-                    'quiet': False, # Nyalakan log agar error terlihat
-                    'no_warnings': False, # Nyalakan warning
-                    'ignoreerrors': False, # JANGAN IGNORE ERROR, BIAR KETAHUAN
+                    'quiet': False,
+                    'no_warnings': False,
+                    'ignoreerrors': False,
                     'writethumbnail': True,
-                    'logger': MyLogger(), # Gunakan logger custom kita
+                    'logger': MyLogger(),
                     'progress_hooks': [my_hook],
+                    # BYPASS BOT: Gunakan klien Android agar lebih dipercaya YouTube
+                    'extractor_args': {
+                        'youtube': {
+                            'player_client': ['android', 'ios'],
+                            'player_skip': ['js', 'web'], # Coba skip JS web yg bikin warning
+                        }
+                    }
                 }
 
                 if use_stealth: opts['user_agent'] = get_random_user_agent()
@@ -409,26 +422,22 @@ with tab_main:
                 # EKSEKUSI UTAMA
                 sukses_count = 0
                 
-                # CEK FFMPEG DULU (PENTING!)
                 if not shutil.which("ffmpeg"):
-                    st.error("❌ CRITICAL ERROR: FFmpeg belum terinstall di server ini! Video tidak bisa digabungkan/diconvert.")
-                    st.info("Solusi: Pastikan file 'packages.txt' berisi 'ffmpeg'.")
+                    st.error("❌ CRITICAL ERROR: FFmpeg belum terinstall di server ini!")
+                    st.info("Solusi: Pastikan file 'packages.txt' berisi 'ffmpeg' dan 'nodejs'.")
                 else:
                     with yt_dlp.YoutubeDL(opts) as ydl:
                         for line in raw_lines:
                             target = line if line.startswith(('http', 'www')) else f"ytsearch1:{line}"
                             try:
                                 info = ydl.extract_info(target, download=True)
-                                # Validasi ganda: Pastikan info tidak kosong (berhasil)
-                                if info:
-                                    sukses_count += 1
+                                if info: sukses_count += 1
                             except Exception as e:
-                                # Error sudah ditangkap MyLogger, tapi kita print juga di expander
-                                st.error(f"Gagal pada target: {target}")
+                                # Error ditangani Logger, tapi exception tetap ditangkap agar app tidak crash
+                                pass
                 
                 if os.path.exists(c_file): os.remove(c_file)
             
-            # HANYA JIKA ADA FILE SUKSES, BARU RERUN UI
             if sukses_count > 0:
                 st.balloons()
                 time.sleep(0.5) 
@@ -486,8 +495,6 @@ with tab_vvip:
 # === TAB 3: ARTIFACTS ===
 with tab_files:
     st.markdown("### 📂 DOWNLOADS STORAGE")
-    
-    # HANYA TAMPILKAN FILE MILIK SESI INI
     all_files = []
     if os.path.exists(DOWNLOAD_DIR):
         all_files = sorted([os.path.join(DOWNLOAD_DIR, f) for f in os.listdir(DOWNLOAD_DIR)], key=os.path.getmtime, reverse=True)
