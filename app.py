@@ -4,18 +4,25 @@ import os
 import shutil
 import time
 import random
-import re
+import uuid
 from datetime import datetime, timedelta, timezone
 
-# --- 0. KONFIGURASI SISTEM ---
+# --- 0. KONFIGURASI SISTEM & SESSION ---
 st.set_page_config(
-    page_title="NEXXUS ZIQVA V10.1 - VVIP",
+    page_title="NEXXUS ZIQVA V10 - PRIVATE",
     page_icon="🧬",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-DOWNLOAD_DIR = "Ziqva_Downloads"
+# MEMBUAT ID UNIK UNTUK SETIAP PENGGUNA (BIAR GAK BENTROK)
+if 'user_session_id' not in st.session_state:
+    st.session_state['user_session_id'] = str(uuid.uuid4())
+
+# Folder Download Unik per User
+BASE_DIR = "Ziqva_Temp_Storage"
+DOWNLOAD_DIR = os.path.join(BASE_DIR, st.session_state['user_session_id'])
+
 if not os.path.exists(DOWNLOAD_DIR):
     os.makedirs(DOWNLOAD_DIR)
 
@@ -112,6 +119,18 @@ st.markdown("""
         font-size: 0.9em;
         color: #00ff41;
     }
+    
+    /* --- LOG TERMINAL --- */
+    .log-terminal {
+        font-family: 'Courier New', monospace;
+        font-size: 0.85em;
+        background: #000;
+        color: #0f0;
+        padding: 10px;
+        border: 1px solid #333;
+        max-height: 300px;
+        overflow-y: auto;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -163,15 +182,17 @@ def format_bytes(size):
     return f"{size:.2f} {power_labels[n]}B"
 
 def cleanup_vault():
+    # HANYA MENGHAPUS FOLDER SESI PENGGUNA INI
     try:
         shutil.rmtree(DOWNLOAD_DIR)
         os.makedirs(DOWNLOAD_DIR)
-        st.session_state['latest_file'] = None # Reset session
+        st.session_state['latest_file'] = None
         return True
     except:
         return False
 
 def hacking_effect(log_ph):
+    # EFEK HACKING DIKIRIM KE LOG PLACEHOLDER (DI TAB INFO)
     texts = [
         "Handshake Protocol VVIP...",
         "Bypassing ISP Throttling...",
@@ -185,6 +206,7 @@ def hacking_effect(log_ph):
         time.sleep(random.uniform(0.1, 0.25))
         ts = datetime.now(wib).strftime("%H:%M:%S")
         log_str += f"[{ts}] > {txt}\n"
+        # Update placeholder di tab info
         log_ph.code(log_str, language="bash")
 
 # --- 3. SIDEBAR ---
@@ -200,7 +222,10 @@ with st.sidebar:
     st.divider()
     if st.button("☢️ EMERGENCY WIPER"):
         if cleanup_vault(): st.toast("CACHE CLEARED!", icon="♻️")
-    st.caption(f"Artifacts: {len(os.listdir(DOWNLOAD_DIR))}")
+    
+    # Menghitung file di folder sesi pengguna
+    user_files = len(os.listdir(DOWNLOAD_DIR)) if os.path.exists(DOWNLOAD_DIR) else 0
+    st.caption(f"My Artifacts: {user_files}")
 
 # --- 4. HEADER ---
 c_logo, c_text = st.columns([1, 6])
@@ -208,17 +233,50 @@ with c_logo:
     st.write("")
     st.markdown("<h1>🧬</h1>", unsafe_allow_html=True)
 with c_text:
-    st.markdown("# NEXXUS ZIQVA V10 <br><span style='font-size:0.5em; color:#000; background:#00ff41; padding:2px 10px; font-weight:bold; box-shadow: 0 0 10px #00ff41;'>VVIP GOD EDITION</span>", unsafe_allow_html=True)
+    st.markdown("# NEXXUS ZIQVA V10 <br><span style='font-size:0.5em; color:#000; background:#00ff41; padding:2px 10px; font-weight:bold; box-shadow: 0 0 10px #00ff41;'>VVIP PRIVATE SESSION</span>", unsafe_allow_html=True)
 
 # TABS UTAMA
-tab_main, tab_vvip, tab_files, tab_info = st.tabs(["🚀 CORE TERMINAL", "💎 VVIP VAULT", "📂 DOWNLOADS", "ℹ️ WARNING"])
+tab_main, tab_vvip, tab_files, tab_info = st.tabs(["🚀 CORE TERMINAL", "💎 VVIP VAULT", "📂 DOWNLOADS", "ℹ️ WARNING & LOGS"])
+
+# Variabel global untuk log placeholder agar bisa diakses dari tab main
+log_placeholder = None
+
+# === ISI TAB INFO & LOGS DULUAN (Supaya placeholder siap) ===
+with tab_info:
+    st.markdown("### 👤 OPERATOR INTEL")
+    c_i1, c_i2 = st.columns([1, 3])
+    with c_i1: st.image("https://img.icons8.com/fluency/96/hacker.png")
+    with c_i2:
+        st.markdown("""
+        **Developer:** Telegram [@effands](https://t.me/effands)  
+        **Website:** [ziqva.com](https://ziqva.com)  
+        **Email:** cs@ziqva.com
+        """)
+    st.divider()
+    st.markdown("""
+    <div class='warning-box'>
+    <h3>⚠️ WARNING BOSKU !!</h3>
+    <p>Pakailah dengan Bijak. Tools ini gratisan murni buat berbagi & bantu-bantu aja, bukan buat diperjualbelikan ya.</p>
+    <p><strong>Segala resiko ditanggung penumpang masing-masing. Dosa tanggung sendiri.</strong></p>
+    <hr style="border-color: #00ff41;">
+    <p><em>Butuh tools lain yang lebih gila? DM ke telegram aja bos ku.. Siap melayani. 😎</em></p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.divider()
+    st.markdown("### 📟 LIVE SYSTEM LOGS")
+    # INI DIA TEMPAT LOG YANG DIMINTA BOSKU
+    log_placeholder = st.empty()
+    log_placeholder.code("Waiting for command sequence...", language="bash")
+    
+    st.success("System Status: **ONLINE** | Session ID: **SECURED**")
 
 # === TAB 1: CORE TERMINAL ===
 with tab_main:
-    # --- SHOW LAST DOWNLOAD (NEW FEATURE) ---
-    # Ini logika baru biar bosku gak bingung. File terakhir langsung muncul disini.
+    # --- SHOW LAST DOWNLOAD ---
     if 'latest_file' in st.session_state and st.session_state['latest_file']:
         last_f = st.session_state['latest_file']
+        # Pastikan file ada di folder sesi user ini
         if os.path.exists(last_f):
             f_name = os.path.basename(last_f)
             f_size = format_bytes(os.path.getsize(last_f))
@@ -226,7 +284,7 @@ with tab_main:
             st.markdown(f"""
             <div style="background:rgba(0, 50, 0, 0.8); padding:15px; margin-bottom:20px; border:2px solid #00ff41; border-radius:5px; text-align:center;">
                 <h3 style='margin:0; color:#00ff41;'>🎉 MISSION SUCCESS!</h3>
-                <p style='color:#fff;'>File siap diamankan, Bosku!</p>
+                <p style='color:#fff;'>File aman di Private Storage bosku.</p>
                 <hr style='border-color:#00ff41;'>
                 <p style='font-weight:bold; color:#00ffff;'>{f_name} ({f_size})</p>
             </div>
@@ -239,7 +297,7 @@ with tab_main:
             st.divider()
 
     st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
-    input_data = st.text_area("🔗 TARGET INPUT (URL / JUDUL)", height=200, placeholder="Paste URL disini bosku (bisa 5-10 link sekaligus)...\nAtau ketik Judul Lagu buat Deep Search.")
+    input_data = st.text_area("🔗 TARGET INPUT (URL / JUDUL)", height=200, placeholder="Paste URL disini bosku...\nFile akan masuk ke Session Folder Pribadi (Anti Bentrok).")
     st.markdown('</div>', unsafe_allow_html=True)
 
     c1, c2 = st.columns(2)
@@ -257,8 +315,12 @@ with tab_main:
             st.warning("⚠️ TARGET NOT FOUND.")
         else:
             raw_lines = [u.strip() for u in input_data.split('\n') if u.strip()]
+            
+            # Update log di Tab Info (meskipun user ada di tab Main, log akan terisi di sana)
+            with log_placeholder:
+                st.write("⚡ INITIALIZING SEQUENCE...")
+            
             status_box = st.status("⚙️ SYSTEM RUNNING...", expanded=True)
-            log_ph = st.empty()
             prog_bar = st.progress(0)
             prog_txt = st.empty()
 
@@ -275,12 +337,14 @@ with tab_main:
                 elif d['status'] == 'finished':
                     prog_bar.progress(1.0)
                     prog_txt.code("✅ PROCESSING ARTIFACT...")
-                    # Save filename to session state for immediate access
                     st.session_state['latest_file'] = d['filename']
 
             with status_box:
-                hacking_effect(log_ph)
-                c_file = "ziqva_cookies.txt"
+                # Kirim log hacking ke tab sebelah
+                hacking_effect(log_placeholder)
+                
+                # Cookie handling (User specific temp name)
+                c_file = f"ziqva_cookies_{st.session_state['user_session_id']}.txt"
                 if cookies_txt:
                     with open(c_file, "w") as f: f.write(cookies_txt)
                 
@@ -352,13 +416,10 @@ with tab_main:
             
             if sukses > 0:
                 st.balloons()
-                # HAPUS time.sleep dan st.rerun() agar tombol download di atas langsung muncul
-                # dan user tidak kaget halamannya refresh sendiri.
-                # Kita pakai st.rerun() CUMA SEKALI biar UI update dan tombol download muncul di atas.
                 time.sleep(0.5) 
                 st.rerun()
 
-# === TAB 2: VVIP VAULT (HIDDEN FEATURES) ===
+# === TAB 2: VVIP VAULT ===
 with tab_vvip:
     st.markdown("### 💎 CLASSIFIED VVIP TOOLS")
     c_v1, c_v2 = st.columns(2)
@@ -408,7 +469,11 @@ with tab_vvip:
 # === TAB 3: ARTIFACTS ===
 with tab_files:
     st.markdown("### 📂 DOWNLOADS STORAGE")
-    all_files = sorted([os.path.join(DOWNLOAD_DIR, f) for f in os.listdir(DOWNLOAD_DIR)], key=os.path.getmtime, reverse=True)
+    
+    # --- ISOLASI FILE: HANYA TAMPILKAN FILE MILIK SESI INI ---
+    all_files = []
+    if os.path.exists(DOWNLOAD_DIR):
+        all_files = sorted([os.path.join(DOWNLOAD_DIR, f) for f in os.listdir(DOWNLOAD_DIR)], key=os.path.getmtime, reverse=True)
     
     display_files = []
     audio_bases = {os.path.splitext(f)[0] for f in all_files if f.endswith(('.mp3', '.m4a', '.wav', '.flac', '.mp4'))}
@@ -422,11 +487,12 @@ with tab_files:
         display_files.append(f_path)
     
     if not display_files:
-        st.info("STORAGE EMPTY. WAITING FOR PAYLOAD.")
+        st.info(f"STORAGE EMPTY ({st.session_state['user_session_id']}). WAITING FOR PAYLOAD.")
     else:
         if st.button("📦 EXTRACT ALL (ZIP)"):
-            shutil.make_archive("Ziqva_VVIP", 'zip', DOWNLOAD_DIR)
-            with open("Ziqva_VVIP.zip", "rb") as f:
+            zip_name = f"Ziqva_VVIP_{st.session_state['user_session_id']}"
+            shutil.make_archive(zip_name, 'zip', DOWNLOAD_DIR)
+            with open(f"{zip_name}.zip", "rb") as f:
                 st.download_button("⬇️ DOWNLOAD PACKAGE", f, "Ziqva_VVIP.zip", "application/zip")
         st.divider()
         for f_path in display_files:
@@ -446,26 +512,3 @@ with tab_files:
             """, unsafe_allow_html=True)
             with open(f_path, "rb") as fb:
                 st.download_button(f"⬇️ GET {f_name}", fb, f_name, key=f_path, use_container_width=True)
-
-# === TAB 4: INFO & WARNING ===
-with tab_info:
-    st.markdown("### 👤 OPERATOR INTEL")
-    c_i1, c_i2 = st.columns([1, 3])
-    with c_i1: st.image("https://img.icons8.com/fluency/96/hacker.png")
-    with c_i2:
-        st.markdown("""
-        **Developer:** Telegram [@effands](https://t.me/effands)  
-        **Website:** [ziqva.com](https://ziqva.com)  
-        **Email:** cs@ziqva.com
-        """)
-    st.divider()
-    st.markdown("""
-    <div class='warning-box'>
-    <h3>⚠️ WARNING BOSKU !!</h3>
-    <p>Pakailah dengan Bijak. Tools ini gratisan murni buat berbagi & bantu-bantu aja, bukan buat diperjualbelikan ya.</p>
-    <p><strong>Segala resiko ditanggung penumpang masing-masing. Dosa tanggung sendiri.</strong></p>
-    <hr style="border-color: #00ff41;">
-    <p><em>Butuh tools lain yang lebih gila? DM ke telegram aja bos ku.. Siap melayani. 😎</em></p>
-    </div>
-    """, unsafe_allow_html=True)
-    st.success("System Status: **ONLINE** | VVIP Access: **GRANTED**")
