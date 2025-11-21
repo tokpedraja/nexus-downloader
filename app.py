@@ -19,12 +19,23 @@ st.set_page_config(
 if 'user_session_id' not in st.session_state:
     st.session_state['user_session_id'] = str(uuid.uuid4())
 
-# Folder Download Unik per User
+# Folder Download Unik per User (Absolute Path biar aman)
 BASE_DIR = "Ziqva_Temp_Storage"
-DOWNLOAD_DIR = os.path.join(BASE_DIR, st.session_state['user_session_id'])
+# Gunakan path absolut untuk menghindari kebingungan direktori kerja
+DOWNLOAD_DIR = os.path.abspath(os.path.join(BASE_DIR, st.session_state['user_session_id']))
 
 if not os.path.exists(DOWNLOAD_DIR):
     os.makedirs(DOWNLOAD_DIR)
+
+# --- CLASS LOGGER KHUSUS UNTUK MENANGKAP ERROR ---
+class MyLogger:
+    def debug(self, msg):
+        # Untuk debug message biasa, kita abaikan biar UI bersih
+        pass
+    def warning(self, msg):
+        st.warning(f"⚠️ Warning: {msg}")
+    def error(self, msg):
+        st.error(f"❌ Error System: {msg}")
 
 # --- 1. TAMPILAN ANTARMUKA (UI - MATRIX THEME) ---
 st.markdown("""
@@ -182,7 +193,6 @@ def format_bytes(size):
     return f"{size:.2f} {power_labels[n]}B"
 
 def cleanup_vault():
-    # HANYA MENGHAPUS FOLDER SESI PENGGUNA INI
     try:
         shutil.rmtree(DOWNLOAD_DIR)
         os.makedirs(DOWNLOAD_DIR)
@@ -192,7 +202,6 @@ def cleanup_vault():
         return False
 
 def hacking_effect(log_ph):
-    # EFEK HACKING DIKIRIM KE LOG PLACEHOLDER (DI TAB INFO)
     texts = [
         "Handshake Protocol VVIP...",
         "Bypassing ISP Throttling...",
@@ -206,7 +215,6 @@ def hacking_effect(log_ph):
         time.sleep(random.uniform(0.1, 0.25))
         ts = datetime.now(wib).strftime("%H:%M:%S")
         log_str += f"[{ts}] > {txt}\n"
-        # Update placeholder di tab info
         log_ph.code(log_str, language="bash")
 
 # --- 3. SIDEBAR ---
@@ -223,7 +231,6 @@ with st.sidebar:
     if st.button("☢️ EMERGENCY WIPER"):
         if cleanup_vault(): st.toast("CACHE CLEARED!", icon="♻️")
     
-    # Menghitung file di folder sesi pengguna
     user_files = len(os.listdir(DOWNLOAD_DIR)) if os.path.exists(DOWNLOAD_DIR) else 0
     st.caption(f"My Artifacts: {user_files}")
 
@@ -238,10 +245,10 @@ with c_text:
 # TABS UTAMA
 tab_main, tab_vvip, tab_files, tab_info = st.tabs(["🚀 CORE TERMINAL", "💎 VVIP VAULT", "📂 DOWNLOADS", "ℹ️ WARNING & LOGS"])
 
-# Variabel global untuk log placeholder agar bisa diakses dari tab main
+# Variabel global
 log_placeholder = None
 
-# === ISI TAB INFO & LOGS DULUAN (Supaya placeholder siap) ===
+# === ISI TAB INFO & LOGS ===
 with tab_info:
     st.markdown("### 👤 OPERATOR INTEL")
     c_i1, c_i2 = st.columns([1, 3])
@@ -265,10 +272,8 @@ with tab_info:
     
     st.divider()
     st.markdown("### 📟 LIVE SYSTEM LOGS")
-    # INI DIA TEMPAT LOG YANG DIMINTA BOSKU
     log_placeholder = st.empty()
     log_placeholder.code("Waiting for command sequence...", language="bash")
-    
     st.success("System Status: **ONLINE** | Session ID: **SECURED**")
 
 # === TAB 1: CORE TERMINAL ===
@@ -276,7 +281,6 @@ with tab_main:
     # --- SHOW LAST DOWNLOAD ---
     if 'latest_file' in st.session_state and st.session_state['latest_file']:
         last_f = st.session_state['latest_file']
-        # Pastikan file ada di folder sesi user ini
         if os.path.exists(last_f):
             f_name = os.path.basename(last_f)
             f_size = format_bytes(os.path.getsize(last_f))
@@ -316,7 +320,6 @@ with tab_main:
         else:
             raw_lines = [u.strip() for u in input_data.split('\n') if u.strip()]
             
-            # Update log di Tab Info (meskipun user ada di tab Main, log akan terisi di sana)
             with log_placeholder:
                 st.write("⚡ INITIALIZING SEQUENCE...")
             
@@ -337,31 +340,31 @@ with tab_main:
                 elif d['status'] == 'finished':
                     prog_bar.progress(1.0)
                     prog_txt.code("✅ PROCESSING ARTIFACT...")
+                    # Set absolute path to verify file existence
                     st.session_state['latest_file'] = d['filename']
 
             with status_box:
-                # Kirim log hacking ke tab sebelah
                 hacking_effect(log_placeholder)
-                
-                # Cookie handling (User specific temp name)
                 c_file = f"ziqva_cookies_{st.session_state['user_session_id']}.txt"
                 if cookies_txt:
                     with open(c_file, "w") as f: f.write(cookies_txt)
                 
+                # --- KONFIGURASI YOUTUBE-DL (DIPERBAIKI) ---
                 opts = {
                     'outtmpl': f'{DOWNLOAD_DIR}/%(title)s [%(id)s].%(ext)s',
                     'restrictfilenames': True,
-                    'quiet': True,
-                    'no_warnings': True,
-                    'ignoreerrors': True,
+                    'quiet': False, # Nyalakan log agar error terlihat
+                    'no_warnings': False, # Nyalakan warning
+                    'ignoreerrors': False, # JANGAN IGNORE ERROR, BIAR KETAHUAN
                     'writethumbnail': True,
+                    'logger': MyLogger(), # Gunakan logger custom kita
                     'progress_hooks': [my_hook],
                 }
 
                 if use_stealth: opts['user_agent'] = get_random_user_agent()
                 if proxy_url: opts['proxy'] = proxy_url
 
-                # VVIP FEATURES
+                # VVIP & PRO FEATURES
                 ffmpeg_args = []
                 if st.session_state.get('vvip_ghost', False):
                     opts['add_metadata'] = False
@@ -392,6 +395,7 @@ with tab_main:
                 if st.session_state.get('ad_kill', False):
                     opts.setdefault('postprocessors', []).append({'key': 'SponsorBlock', 'categories': ['sponsor', 'intro', 'outro']})
 
+                # FORMAT
                 if "Video" in dl_mode:
                     h = {"360p":"360","720p":"720","1080p":"1080","2K":"1440","4K":"2160","8K":"4320"}.get(video_res, "1080")
                     opts['format'] = f'bestvideo[height<={h}]+bestaudio/best[height<={h}]'
@@ -402,22 +406,35 @@ with tab_main:
                 elif "Intel" in dl_mode:
                     opts['skip_download'] = True; opts['writethumbnail'] = True
 
-                with yt_dlp.YoutubeDL(opts) as ydl:
-                    sukses = 0
-                    for line in raw_lines:
-                        target = line if line.startswith(('http', 'www')) else f"ytsearch1:{line}"
-                        try:
-                            ydl.extract_info(target, download=True)
-                            sukses += 1
-                        except Exception as e:
-                            st.error(f"Error: {str(e)}")
+                # EKSEKUSI UTAMA
+                sukses_count = 0
+                
+                # CEK FFMPEG DULU (PENTING!)
+                if not shutil.which("ffmpeg"):
+                    st.error("❌ CRITICAL ERROR: FFmpeg belum terinstall di server ini! Video tidak bisa digabungkan/diconvert.")
+                    st.info("Solusi: Pastikan file 'packages.txt' berisi 'ffmpeg'.")
+                else:
+                    with yt_dlp.YoutubeDL(opts) as ydl:
+                        for line in raw_lines:
+                            target = line if line.startswith(('http', 'www')) else f"ytsearch1:{line}"
+                            try:
+                                info = ydl.extract_info(target, download=True)
+                                # Validasi ganda: Pastikan info tidak kosong (berhasil)
+                                if info:
+                                    sukses_count += 1
+                            except Exception as e:
+                                # Error sudah ditangkap MyLogger, tapi kita print juga di expander
+                                st.error(f"Gagal pada target: {target}")
                 
                 if os.path.exists(c_file): os.remove(c_file)
             
-            if sukses > 0:
+            # HANYA JIKA ADA FILE SUKSES, BARU RERUN UI
+            if sukses_count > 0:
                 st.balloons()
                 time.sleep(0.5) 
                 st.rerun()
+            else:
+                st.warning("⚠️ Proses selesai tapi tidak ada file yang berhasil di-download. Cek pesan error di atas.")
 
 # === TAB 2: VVIP VAULT ===
 with tab_vvip:
@@ -470,7 +487,7 @@ with tab_vvip:
 with tab_files:
     st.markdown("### 📂 DOWNLOADS STORAGE")
     
-    # --- ISOLASI FILE: HANYA TAMPILKAN FILE MILIK SESI INI ---
+    # HANYA TAMPILKAN FILE MILIK SESI INI
     all_files = []
     if os.path.exists(DOWNLOAD_DIR):
         all_files = sorted([os.path.join(DOWNLOAD_DIR, f) for f in os.listdir(DOWNLOAD_DIR)], key=os.path.getmtime, reverse=True)
