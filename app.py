@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 
 # --- 0. KONFIGURASI SISTEM ---
 st.set_page_config(
-    page_title="NEXXUS ZIQVA V10 - VVIP",
+    page_title="NEXXUS ZIQVA V10.1 - VVIP",
     page_icon="🧬",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -29,12 +29,6 @@ st.markdown("""
         0% { background-position: 0 0; }
         100% { background-position: 50px 50px; }
     }
-    @keyframes pulseNeon {
-        0% { box-shadow: 0 0 5px #00ff41; }
-        50% { box-shadow: 0 0 20px #00ff41, 0 0 10px #00ffff; }
-        100% { box-shadow: 0 0 5px #00ff41; }
-    }
-
     .stApp {
         background-color: #020502;
         background-image: 
@@ -55,7 +49,7 @@ st.markdown("""
         letter-spacing: 2px;
     }
     
-    /* --- INPUT FIELDS (Matrix Style) --- */
+    /* --- INPUT FIELDS --- */
     .stTextArea textarea, .stTextInput input, .stSelectbox div[data-baseweb="select"] {
         background-color: rgba(0, 20, 0, 0.9) !important;
         color: #00ff41 !important;
@@ -64,7 +58,7 @@ st.markdown("""
         font-family: 'Share Tech Mono', monospace;
     }
     
-    /* --- TOMBOL VVIP --- */
+    /* --- BUTTONS --- */
     div.stButton > button {
         background: #000 !important;
         color: #00ff41 !important;
@@ -84,31 +78,15 @@ st.markdown("""
         box-shadow: 0 0 30px #00ff41;
         transform: scale(1.01);
     }
-    div.stButton > button:active {
-        background: #00ffff !important; /* Cyan saat diklik */
-    }
     
     /* --- KARTU KONTEN --- */
     .ziqva-card {
         background: rgba(0, 15, 5, 0.85);
         border: 1px solid #00ff41;
-        border-left: 5px solid #00ffff; /* Aksen Cyan */
+        border-left: 5px solid #00ffff;
         padding: 20px;
         margin-bottom: 15px;
-        position: relative;
         backdrop-filter: blur(4px);
-    }
-    .ziqva-card::before {
-        content: "VVIP_ACCESS";
-        position: absolute;
-        top: -10px;
-        right: 10px;
-        background: #000;
-        color: #00ffff;
-        font-size: 10px;
-        padding: 0 5px;
-        border: 1px solid #00ffff;
-        letter-spacing: 1px;
     }
 
     /* --- PROGRESS BAR --- */
@@ -134,12 +112,6 @@ st.markdown("""
         font-size: 0.9em;
         color: #00ff41;
     }
-
-    /* --- MOBILE FIX --- */
-    @media (max-width: 640px) {
-        h1 { font-size: 1.6rem !important; }
-        .stApp { background-size: 20px 20px; }
-    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -148,7 +120,6 @@ if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
 def check_access():
-    # KODE AKSES DEFAULT: ziqva.com
     if st.session_state['access_code'] == 'ziqva.com':
         st.session_state['authenticated'] = True
         st.toast("✅ AKSES DITERIMA! SELAMAT DATANG BOSKU.", icon="🔓")
@@ -158,7 +129,6 @@ def check_access():
 
 if not st.session_state['authenticated']:
     st.markdown("<br><br>", unsafe_allow_html=True)
-    
     col_l1, col_l2, col_l3 = st.columns([1,2,1])
     with col_l2:
         st.markdown("""
@@ -169,13 +139,10 @@ if not st.session_state['authenticated']:
             <p style='font-size: 0.8em; color: #ccc;'>SYSTEM LOCKED. AUTHORIZED PERSONNEL ONLY.</p>
         </div>
         """, unsafe_allow_html=True)
-        
         st.text_input("MASUKKAN KODE AKSES", type="password", key="access_code", on_change=check_access)
         st.button("UNLOCK SYSTEM 🔓", on_click=check_access, use_container_width=True)
-        
-        st.markdown("<p style='text-align:center; color:#666; margin-top:20px; font-size:0.7em;'>official website: ziqva.com</p>", unsafe_allow_html=True)
-    
-    st.stop() # Stop app execution if not logged in
+        st.markdown("<p style='text-align:center; color:#666; margin-top:20px; font-size:0.7em;'>Hint: ziqva.com</p>", unsafe_allow_html=True)
+    st.stop()
 
 # --- 2. FUNGSI BANTUAN ---
 def get_random_user_agent():
@@ -199,6 +166,7 @@ def cleanup_vault():
     try:
         shutil.rmtree(DOWNLOAD_DIR)
         os.makedirs(DOWNLOAD_DIR)
+        st.session_state['latest_file'] = None # Reset session
         return True
     except:
         return False
@@ -222,23 +190,16 @@ def hacking_effect(log_ph):
 # --- 3. SIDEBAR ---
 with st.sidebar:
     st.markdown("## 🎛️ SYSTEM OVERRIDE")
-    
-    # RESTORED: Auto Destruct Timer
     st.markdown("### 💣 Evidence Wiper")
     auto_destruct = st.toggle("Auto-Delete (5 min)", value=False, help="File otomatis meledak (terhapus) 5 menit setelah download.")
-    
     st.markdown("### 🍪 Premium Auth")
     cookies_txt = st.text_area("Input Netscape Cookies", height=70)
-    
     st.markdown("### 👻 Stealth Matrix")
     use_stealth = st.checkbox("User-Agent Spoofing", value=True)
     proxy_url = st.text_input("Elite Proxy Node")
-    
     st.divider()
     if st.button("☢️ EMERGENCY WIPER"):
-        if cleanup_vault():
-            st.toast("CACHE CLEARED!", icon="♻️")
-    
+        if cleanup_vault(): st.toast("CACHE CLEARED!", icon="♻️")
     st.caption(f"Artifacts: {len(os.listdir(DOWNLOAD_DIR))}")
 
 # --- 4. HEADER ---
@@ -254,6 +215,29 @@ tab_main, tab_vvip, tab_files, tab_info = st.tabs(["🚀 CORE TERMINAL", "💎 V
 
 # === TAB 1: CORE TERMINAL ===
 with tab_main:
+    # --- SHOW LAST DOWNLOAD (NEW FEATURE) ---
+    # Ini logika baru biar bosku gak bingung. File terakhir langsung muncul disini.
+    if 'latest_file' in st.session_state and st.session_state['latest_file']:
+        last_f = st.session_state['latest_file']
+        if os.path.exists(last_f):
+            f_name = os.path.basename(last_f)
+            f_size = format_bytes(os.path.getsize(last_f))
+            
+            st.markdown(f"""
+            <div style="background:rgba(0, 50, 0, 0.8); padding:15px; margin-bottom:20px; border:2px solid #00ff41; border-radius:5px; text-align:center;">
+                <h3 style='margin:0; color:#00ff41;'>🎉 MISSION SUCCESS!</h3>
+                <p style='color:#fff;'>File siap diamankan, Bosku!</p>
+                <hr style='border-color:#00ff41;'>
+                <p style='font-weight:bold; color:#00ffff;'>{f_name} ({f_size})</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            col_d1, col_d2, col_d3 = st.columns([1,2,1])
+            with col_d2:
+                with open(last_f, "rb") as fb:
+                    st.download_button(f"⬇️ DOWNLOAD {f_name} SEKARANG", fb, f_name, key="main_dl_btn", type="primary", use_container_width=True)
+            st.divider()
+
     st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
     input_data = st.text_area("🔗 TARGET INPUT (URL / JUDUL)", height=200, placeholder="Paste URL disini bosku (bisa 5-10 link sekaligus)...\nAtau ketik Judul Lagu buat Deep Search.")
     st.markdown('</div>', unsafe_allow_html=True)
@@ -273,8 +257,6 @@ with tab_main:
             st.warning("⚠️ TARGET NOT FOUND.")
         else:
             raw_lines = [u.strip() for u in input_data.split('\n') if u.strip()]
-            
-            # UI Progress
             status_box = st.status("⚙️ SYSTEM RUNNING...", expanded=True)
             log_ph = st.empty()
             prog_bar = st.progress(0)
@@ -292,11 +274,12 @@ with tab_main:
                     except: pass
                 elif d['status'] == 'finished':
                     prog_bar.progress(1.0)
-                    prog_txt.code("✅ DOWNLOAD COMPLETE! Cek hasil di menu 'DOWNLOADS' ya bosku.")
+                    prog_txt.code("✅ PROCESSING ARTIFACT...")
+                    # Save filename to session state for immediate access
+                    st.session_state['latest_file'] = d['filename']
 
             with status_box:
                 hacking_effect(log_ph)
-                
                 c_file = "ziqva_cookies.txt"
                 if cookies_txt:
                     with open(c_file, "w") as f: f.write(cookies_txt)
@@ -314,56 +297,26 @@ with tab_main:
                 if use_stealth: opts['user_agent'] = get_random_user_agent()
                 if proxy_url: opts['proxy'] = proxy_url
 
-                # --- VVIP FEATURES & CONFLICT FIX ---
-                # Initialize FFmpeg arguments list
+                # VVIP FEATURES
                 ffmpeg_args = []
-
-                # 1. GHOST PROTOCOL (Metadata Wiper)
                 if st.session_state.get('vvip_ghost', False):
                     opts['add_metadata'] = False
-                    # Menambahkan args penghapus metadata
                     ffmpeg_args.extend(['-map_metadata', '-1', '-bn', '-vn'])
-                    st.write("👻 GHOST PROTOCOL: Metadata Stripping Active...")
-
-                # 2. SONIC MUTATOR (Audio Mods)
-                # Jika aktif, tambahkan filter ke list ffmpeg_args yang sudah ada (jangan ditimpa)
+                
                 if "Audio" in dl_mode and st.session_state.get('sonic_active', False):
                     effect = st.session_state.get('sonic_effect', 'Normal')
-                    if effect == 'Nightcore': 
-                        ffmpeg_args.extend(['-af', 'asetrate=44100*1.25,aresample=44100'])
-                    elif effect == 'Slowed+Reverb': 
-                        ffmpeg_args.extend(['-af', 'asetrate=44100*0.85,aresample=44100,aecho=0.8:0.9:1000:0.3'])
-                    elif effect == 'Bass Boost': 
-                        ffmpeg_args.extend(['-af', 'equalizer=f=50:width_type=o:width=2:g=20'])
+                    if effect == 'Nightcore': ffmpeg_args.extend(['-af', 'asetrate=44100*1.25,aresample=44100'])
+                    elif effect == 'Slowed+Reverb': ffmpeg_args.extend(['-af', 'asetrate=44100*0.85,aresample=44100,aecho=0.8:0.9:1000:0.3'])
+                    elif effect == 'Bass Boost': ffmpeg_args.extend(['-af', 'equalizer=f=50:width_type=o:width=2:g=20'])
                 
-                # APPLY FFmpeg Args safely (Merge Logic)
-                if ffmpeg_args:
-                    opts['postprocessor_args'] = {'ffmpeg': ffmpeg_args}
+                if ffmpeg_args: opts['postprocessor_args'] = {'ffmpeg': ffmpeg_args}
+                if st.session_state.get('vvip_speed', False): opts['concurrent_fragment_downloads'] = 10
+                if st.session_state.get('vvip_live', False): opts['live_from_start'] = True; opts['wait_for_video'] = (1, 10)
+                if st.session_state.get('vvip_godseye', False): opts['writeinfojson'] = True
 
-                # 3. HYPER-THREADING
-                if st.session_state.get('vvip_speed', False):
-                    opts['concurrent_fragment_downloads'] = 10
-                    st.write("🚀 HYPER-THREADING: 10 Parallel Threads Active!")
-
-                # 4. LIVE INTERCEPTOR
-                if st.session_state.get('vvip_live', False):
-                    opts['live_from_start'] = True
-                    opts['wait_for_video'] = (1, 10)
-                    st.write("📡 LIVE INTERCEPTOR: Recording Stream...")
-
-                # 5. GOD'S EYE
-                if st.session_state.get('vvip_godseye', False):
-                    opts['writeinfojson'] = True
-                    st.write("👁️ GOD'S EYE: Extracting Intel...")
-
-                # Standard Configs
-                if st.session_state.get('geo_active', False):
-                    opts['geo_bypass_country'] = st.session_state.get('geo_code', 'US')
-                
-                if st.session_state.get('vacuum_active', False):
-                    opts['playlistend'] = st.session_state.get('vacuum_limit', 5)
-                else:
-                    opts['noplaylist'] = True
+                if st.session_state.get('geo_active', False): opts['geo_bypass_country'] = st.session_state.get('geo_code', 'US')
+                if st.session_state.get('vacuum_active', False): opts['playlistend'] = st.session_state.get('vacuum_limit', 5)
+                else: opts['noplaylist'] = True
 
                 if st.session_state.get('cut_active', False):
                     opts['external_downloader'] = 'ffmpeg'
@@ -375,71 +328,50 @@ with tab_main:
                 if st.session_state.get('ad_kill', False):
                     opts.setdefault('postprocessors', []).append({'key': 'SponsorBlock', 'categories': ['sponsor', 'intro', 'outro']})
 
-                # --- FORMAT CONFIG ---
                 if "Video" in dl_mode:
                     h = {"360p":"360","720p":"720","1080p":"1080","2K":"1440","4K":"2160","8K":"4320"}.get(video_res, "1080")
                     opts['format'] = f'bestvideo[height<={h}]+bestaudio/best[height<={h}]'
                     opts['merge_output_format'] = 'mp4'
-                    
                 elif "Audio" in dl_mode:
                     opts['format'] = 'bestaudio/best'
-                    opts['postprocessors'] = [
-                        {'key': 'FFmpegExtractAudio', 'preferredcodec': audio_fmt},
-                        {'key': 'FFmpegMetadata'},
-                        {'key': 'EmbedThumbnail'},
-                    ]
-                    
+                    opts['postprocessors'] = [{'key': 'FFmpegExtractAudio', 'preferredcodec': audio_fmt}, {'key': 'FFmpegMetadata'}, {'key': 'EmbedThumbnail'}]
                 elif "Intel" in dl_mode:
-                    opts['skip_download'] = True
-                    opts['writethumbnail'] = True
+                    opts['skip_download'] = True; opts['writethumbnail'] = True
 
-                # EXECUTION
                 with yt_dlp.YoutubeDL(opts) as ydl:
                     sukses = 0
                     for line in raw_lines:
-                        target = line
-                        if not line.startswith(('http', 'www')):
-                            st.write(f"🕵️ Deep Search: Searching Database for '{line}'...")
-                            target = f"ytsearch1:{line}"
-                        
+                        target = line if line.startswith(('http', 'www')) else f"ytsearch1:{line}"
                         try:
-                            st.write(f"🎯 Locking Target: {line}")
                             ydl.extract_info(target, download=True)
                             sukses += 1
                         except Exception as e:
-                            st.error(f"Mission Failed: {str(e)}")
+                            st.error(f"Error: {str(e)}")
                 
                 if os.path.exists(c_file): os.remove(c_file)
             
             if sukses > 0:
                 st.balloons()
-                st.success(f"🎉 MISSION ACCOMPLISHED! {sukses} Artifacts Secured.")
-                
-                # AUTO DESTRUCT LOGIC
-                if auto_destruct:
-                    st.warning("💣 AUTO-DESTRUCT ACTIVE: Files will be nuked in 5 minutes...")
-                    # Note: In a real server app, this needs async worker. In Streamlit, this is just visual warning unless we hold thread.
-                
-                time.sleep(1)
+                # HAPUS time.sleep dan st.rerun() agar tombol download di atas langsung muncul
+                # dan user tidak kaget halamannya refresh sendiri.
+                # Kita pakai st.rerun() CUMA SEKALI biar UI update dan tombol download muncul di atas.
+                time.sleep(0.5) 
                 st.rerun()
 
 # === TAB 2: VVIP VAULT (HIDDEN FEATURES) ===
 with tab_vvip:
     st.markdown("### 💎 CLASSIFIED VVIP TOOLS")
-    
     c_v1, c_v2 = st.columns(2)
     
     with c_v1:
         st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
         st.markdown("**👁️ GOD'S EYE (NEW)**")
         st.toggle("Extract Metadata Intel (JSON)", key="vvip_godseye")
-        st.caption("Menyedot data rahasia (Tags, Upload IP, Camera Info) ke file .json. Berguna buat intelijen.")
         st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
         st.markdown("**🚀 HYPER-THREADING**")
         st.toggle("Force 10x Connections", key="vvip_speed")
-        st.caption("Memaksa server membuka 10 jalur koneksi. Kenceng parah!")
         st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
@@ -452,7 +384,6 @@ with tab_vvip:
         st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
         st.markdown("**👻 GHOST PROTOCOL**")
         st.toggle("Metadata Wiper", key="vvip_ghost")
-        st.caption("Hapus jejak digital di file hasil download.")
         st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
@@ -462,23 +393,16 @@ with tab_vvip:
         
         st.markdown('<div class="ziqva-card">', unsafe_allow_html=True)
         st.markdown("**🌍 UTILS & CLIPPER**")
-        
         st.toggle("Geo-Bypass", key="geo_active")
-        if st.session_state.get('geo_active'):
-            st.text_input("ISO Code", "US", key="geo_code")
-            
+        if st.session_state.get('geo_active'): st.text_input("ISO Code", "US", key="geo_code")
         st.toggle("Playlist Vacuum", key="vacuum_active")
-        if st.session_state.get('vacuum_active'):
-            st.slider("Limit", 1, 50, 5, key="vacuum_limit")
-
+        if st.session_state.get('vacuum_active'): st.slider("Limit", 1, 50, 5, key="vacuum_limit")
         st.divider()
-        
         st.markdown("**✂️ TIME CLIPPER (Potong)**")
         cut_active = st.toggle("Aktifkan Pemotong", key="cut_active")
         cc1, cc2 = st.columns(2)
         cc1.text_input("Start", "00:00:00", key="t_start", disabled=not cut_active)
         cc2.text_input("End", "00:01:00", key="t_end", disabled=not cut_active)
-        
         st.markdown('</div>', unsafe_allow_html=True)
 
 # === TAB 3: ARTIFACTS ===
@@ -493,12 +417,8 @@ with tab_files:
         f_name = os.path.basename(f_path)
         base_name = os.path.splitext(f_path)[0]
         ext = os.path.splitext(f_name)[1].lower()
-        
         if f_name.endswith(('.part', '.ytdl')): continue
-        
-        if ext in ['.jpg', '.webp', '.png'] and base_name in audio_bases:
-            continue
-            
+        if ext in ['.jpg', '.webp', '.png'] and base_name in audio_bases: continue
         display_files.append(f_path)
     
     if not display_files:
@@ -508,12 +428,10 @@ with tab_files:
             shutil.make_archive("Ziqva_VVIP", 'zip', DOWNLOAD_DIR)
             with open("Ziqva_VVIP.zip", "rb") as f:
                 st.download_button("⬇️ DOWNLOAD PACKAGE", f, "Ziqva_VVIP.zip", "application/zip")
-        
         st.divider()
         for f_path in display_files:
             f_name = os.path.basename(f_path)
             f_size = format_bytes(os.path.getsize(f_path))
-            
             icon = "📄"
             if f_name.endswith(('.mp3', '.m4a', '.wav')): icon = "🎵"
             elif f_name.endswith(('.mp4', '.mkv')): icon = "📺"
@@ -526,35 +444,28 @@ with tab_files:
                 <div style="font-size:0.8em; color:#00ffff;">SIZE: {f_size}</div>
             </div>
             """, unsafe_allow_html=True)
-            
             with open(f_path, "rb") as fb:
                 st.download_button(f"⬇️ GET {f_name}", fb, f_name, key=f_path, use_container_width=True)
 
-# === TAB 4: INFO & WARNING (MANDATORY) ===
+# === TAB 4: INFO & WARNING ===
 with tab_info:
     st.markdown("### 👤 OPERATOR INTEL")
-    
     c_i1, c_i2 = st.columns([1, 3])
-    with c_i1:
-        st.image("https://img.icons8.com/fluency/96/hacker.png")
+    with c_i1: st.image("https://img.icons8.com/fluency/96/hacker.png")
     with c_i2:
         st.markdown("""
         **Developer:** Telegram [@effands](https://t.me/effands)  
         **Website:** [ziqva.com](https://ziqva.com)  
         **Email:** cs@ziqva.com
         """)
-    
     st.divider()
-    
-    # --- WARNING SECTION (BAHASA SANTAI) ---
     st.markdown("""
     <div class='warning-box'>
     <h3>⚠️ WARNING BOSKU !!</h3>
-    <p>Pakailah dengan Bijak. Tools ini gratis, murni buat berbagi & bantu-bantu aja, bukan buat diperjual belikan ya.</p>
+    <p>Pakailah dengan Bijak. Tools ini gratisan murni buat berbagi & bantu-bantu aja, bukan buat diperjualbelikan ya.</p>
     <p><strong>Segala resiko ditanggung penumpang masing-masing. Dosa tanggung sendiri.</strong></p>
     <hr style="border-color: #00ff41;">
-    <p><em>Butuh tools lain yang lebih gila? DM ke telegram aja bos ku.. Siap kasih info. 😎</em></p>
+    <p><em>Butuh tools lain yang lebih gila? DM ke telegram aja bos ku.. Siap melayani. 😎</em></p>
     </div>
     """, unsafe_allow_html=True)
-    
     st.success("System Status: **ONLINE** | VVIP Access: **GRANTED**")
